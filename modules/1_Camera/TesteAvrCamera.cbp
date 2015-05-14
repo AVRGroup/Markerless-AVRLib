@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="TesteAvrCamera" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="CV">
+				<Option output="../bin/TesteAvrCameraCV" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../bin/Obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="GL">
+				<Option output="../bin/TesteAvrCameraGL" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../bin/Obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="../include" />
+				</Compiler>
+				<Linker>
+					<Add library="libglut32.a" />
+					<Add library="libopengl32.a" />
+					<Add library="libglu32.a" />
+					<Add library="libjpeg.a" />
+					<Add directory="../lib" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
+		</Compiler>
+		<Linker>
+			<Add library="libopencv_calib3d2410.dll.a" />
+			<Add library="libopencv_core2410.dll.a" />
+			<Add library="libopencv_features2d2410.dll.a" />
+			<Add library="libopencv_highgui2410.dll.a" />
+			<Add library="libopencv_imgproc2410.dll.a" />
+			<Add library="libopencv_nonfree2410.dll.a" />
+			<Add library="libopencv_flann2410.dll.a" />
+			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
+		</Linker>
+		<Unit filename="Camera.cpp" />
+		<Unit filename="Camera.hpp" />
+		<Unit filename="CameraAxisView.cpp">
+			<Option target="GL" />
+		</Unit>
+		<Unit filename="Constants.hpp">
+			<Option target="GL" />
+		</Unit>
+		<Unit filename="Interface.cpp">
+			<Option target="GL" />
+		</Unit>
+		<Unit filename="Interface.hpp">
+			<Option target="GL" />
+		</Unit>
+		<Unit filename="Point.hpp" />
+		<Unit filename="Point.tcc" />
+		<Unit filename="Quaternion.cpp" />
+		<Unit filename="Quaternion.hpp" />
+		<Unit filename="TransformationMatrix.cpp" />
+		<Unit filename="TransformationMatrix.hpp" />
+		<Unit filename="main.cpp">
+			<Option target="CV" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
