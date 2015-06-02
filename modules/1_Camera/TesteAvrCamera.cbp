@@ -8,7 +8,7 @@
 		<Build>
 			<Target title="CV">
 				<Option output="../bin/TesteAvrCameraCV" prefix_auto="1" extension_auto="1" />
-				<Option object_output="../bin/Obj/" />
+				<Option object_output="../../bin/Obj/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -17,19 +17,19 @@
 			</Target>
 			<Target title="GL">
 				<Option output="../bin/TesteAvrCameraGL" prefix_auto="1" extension_auto="1" />
-				<Option object_output="../bin/Obj/" />
+				<Option object_output="../../bin/Obj/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add directory="../include" />
+					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
 					<Add library="libglut32.a" />
 					<Add library="libopengl32.a" />
 					<Add library="libglu32.a" />
 					<Add library="libjpeg.a" />
-					<Add directory="../lib" />
+					<Add directory="../../lib" />
 				</Linker>
 			</Target>
 		</Build>
