@@ -3,9 +3,7 @@
 #include <cstdio>
 
 #include "Point.hpp"
-#include "Bounding.hpp"
 #include "SafePointer.hpp"
-#include "TransformationMatrix.hpp"
 
 #include <opencv2/opencv.hpp>
 
