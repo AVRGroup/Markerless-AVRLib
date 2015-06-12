@@ -37,11 +37,20 @@
 			<Add library="libopencv_flann2410.dll.a" />
 			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
 		</Linker>
-		<Unit filename="Point.hpp" />
-		<Unit filename="Point.tcc" />
-		<Unit filename="SafePointer.hpp" />
-		<Unit filename="SafePointer.tcc" />
+		<Unit filename="Core.hpp" />
+		<Unit filename="common.tcc" />
+		<Unit filename="handling.cpp" />
+		<Unit filename="handling.hpp" />
+		<Unit filename="helper.hxx" />
 		<Unit filename="main.cpp" />
+		<Unit filename="matrix.cpp" />
+		<Unit filename="matrix.hpp" />
+		<Unit filename="matx.tcc" />
+		<Unit filename="points.tcc" />
+		<Unit filename="rectangles.tcc" />
+		<Unit filename="scalar.tcc" />
+		<Unit filename="types.hxx" />
+		<Unit filename="vec.tcc" />
 		<Extensions>
 			<code_completion />
 			<envvars />

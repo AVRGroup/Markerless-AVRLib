@@ -1,57 +1,31 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <assert.h>
 
-#include "Point.hpp"
-#include "SafePointer.hpp"
+//#include <opencv2/opencv.hpp>
 
-#include <opencv2/opencv.hpp>
+#include "Core.hpp"
 
 using namespace std;
-using namespace avr;
+using namespace cv;
 
-class Base {
-public:
-   int x;
-   Base(int _x) : x(_x){}
-   virtual ~Base(){cout << "dtor1\n";}
 
-   friend ostream& operator << (ostream& out, const Base& b) {
-      out << b.x;
-      return out;
-   }
-};
-
-class Derivated : public Base {
-public:
-   int y;
-   Derivated(int x, int y = 0) : Base(x), y(y) {}
-   ~Derivated(){cout << "dtor\n"; }
-
-   friend ostream& operator << (ostream& out, const Derivated& d) {
-      out << d.x << " " << d.y;
-      return out;
-   }
-};
-
-#define ASSERT(e) (e) ? (void) (cout << "Assertion failed (" << #e << ") in " << __FILE__ << ":" << __LINE__) : (void) 0
 
 int main(int argc, char* args[]){
-   // = += -= + - neg == !=
+    Matx<float, 4, 4> a = Matx<float, 4, 4>::ones();
+    Matx<float, 4, 2> b = Matx<float, 4, 2>::all(3);
 
-   Point2i p1, p2(4, 3), p3 = (p1 -p2) * 2;
-   p1 -= p3 + p3;
-
-   // QUE COISA LINDA *-----*
-   ASSERT(p1 != p2);
-
-//   Point3i p5 = Point3i(p1);
-//   Point2d p4(p5);
-//
-//   cout << p5 << " " << p4 << " " << p3 << " " << ((p1) != (p1)) << " " << !p1 << endl;
-//
-//   SafePointer<Point2i> p = (&p2 + 0xA4);
-//   cout << p;
+//    Matx<float, 4, 1> c = a * b;
+//    cout << c << endl;
+//cout << setBreakOnError(true) << endl;
+    Vec<float, 2> d = Vec<float, 2>(4, 3);
+//    try{
+        d.cross(Vec<float, 2>(1, 5));
+//    } catch (const avr::Exception&) {
+//        cout << "\n\neee\n\n";
+//    }
+//    cout << d;
 
    return 0;
 }
