@@ -72,7 +72,8 @@
     enum Cod {
 #endif // __cplusplus
         AssertionFailed = 101,  //!< not passed in assert condition
-        InvalidArgument,        //!< any argument is invalid
+        FunctionArgument,       //!< any function's argument is invalid
+        TemplateArgument,       //!< any template's argument is invalid
         OutOfRange,             //!< exceeded array size
         NullPointer,            //!< the pointer is null
         DividedByZero,          //!< division by 0

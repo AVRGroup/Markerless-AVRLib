@@ -121,39 +121,32 @@ template<typename _Tp, int cn> inline Vec<_Tp, cn> Vec<_Tp, cn>::mul(const Vec<_
     return w;
 }
 
-template<typename _Tp> Vec<_Tp, 2> conjugate(const Vec<_Tp, 2>& v)
+template<typename _Tp> inline Vec<_Tp, 2> conjugate(const Vec<_Tp, 2>& v)
 {
     return Vec<_Tp, 2>(v[0], -v[1]);
 }
 
-template<typename _Tp> Vec<_Tp, 4> conjugate(const Vec<_Tp, 4>& v)
+template<typename _Tp> inline Vec<_Tp, 4> conjugate(const Vec<_Tp, 4>& v)
 {
     return Vec<_Tp, 4>(v[0], -v[1], -v[2], -v[3]);
 }
 
-template<> inline Vec<float, 2> Vec<float, 2>::conj() const
+template<typename _Tp, int cn> inline Vec<_Tp, cn> Vec<_Tp, cn>::conj() const
 {
-    return conjugate(*this);
+   if(cn == 4 || cn == 2) return conjugate(*this);
+   AVR_ERROR(Cod::TemplateArgument, "for arbitrary-size vector there is no conjugation defined");
+   return Vec<_Tp, cn>();
 }
-
-template<> inline Vec<double, 2> Vec<double, 2>::conj() const
-{
-    return conjugate(*this);
-}
-
-template<> inline Vec<float, 4> Vec<float, 4>::conj() const
-{
-    return conjugate(*this);
-}
-
-template<> inline Vec<double, 4> Vec<double, 4>::conj() const
-{
-    return conjugate(*this);
-}
+template<> inline Vec<int, 2> Vec<int, 2>::conj() const { return conjugate(*this); }
+template<> inline Vec<float, 2> Vec<float, 2>::conj() const { return conjugate(*this); }
+template<> inline Vec<double, 2> Vec<double, 2>::conj() const { return conjugate(*this); }
+template<> inline Vec<int, 4> Vec<int, 4>::conj() const { return conjugate(*this); }
+template<> inline Vec<float, 4> Vec<float, 4>::conj() const { return conjugate(*this); }
+template<> inline Vec<double, 4> Vec<double, 4>::conj() const { return conjugate(*this); }
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn> Vec<_Tp, cn>::cross(const Vec<_Tp, cn>&) const
 {
-    AVR_ERROR(Cod::Unknown, "for arbitrary-size vector there is no cross-product defined");
+    AVR_ERROR(Cod::TemplateArgument, "for arbitrary-size vector there is no cross-product defined");
     return Vec<_Tp, cn>();
 }
 
@@ -203,19 +196,12 @@ template<typename _Tp, int cn> inline _Tp& Vec<_Tp, cn>::operator ()(int i)
     return this->val[i];
 }
 
+/// Adition
 template<typename _Tp1, typename _Tp2, int cn> static inline Vec<_Tp1, cn>&
 operator += (Vec<_Tp1, cn>& a, const Vec<_Tp2, cn>& b)
 {
     for( int i = 0; i < cn; i++ )
         a.val[i] = saturate_cast<_Tp1>(a.val[i] + b.val[i]);
-    return a;
-}
-
-template<typename _Tp1, typename _Tp2, int cn> static inline Vec<_Tp1, cn>&
-operator -= (Vec<_Tp1, cn>& a, const Vec<_Tp2, cn>& b)
-{
-    for( int i = 0; i < cn; i++ )
-        a.val[i] = saturate_cast<_Tp1>(a.val[i] - b.val[i]);
     return a;
 }
 
@@ -228,6 +214,15 @@ operator + (const Vec<_Tp, cn>& a, const Vec<_Tp, cn>& b)
     return sum;
 }
 
+/// Subtraction
+template<typename _Tp1, typename _Tp2, int cn> static inline Vec<_Tp1, cn>&
+operator -= (Vec<_Tp1, cn>& a, const Vec<_Tp2, cn>& b)
+{
+    for( int i = 0; i < cn; i++ )
+        a.val[i] = saturate_cast<_Tp1>(a.val[i] - b.val[i]);
+    return a;
+}
+
 template<typename _Tp, int cn> static inline Vec<_Tp, cn>
 operator - (const Vec<_Tp, cn>& a, const Vec<_Tp, cn>& b)
 {
@@ -237,6 +232,7 @@ operator - (const Vec<_Tp, cn>& a, const Vec<_Tp, cn>& b)
     return sub;
 }
 
+/// Multiplication by scalar
 template<typename _Tp, int cn> static inline
 Vec<_Tp, cn>& operator *= (Vec<_Tp, cn>& a, int alpha)
 {
@@ -258,33 +254,6 @@ Vec<_Tp, cn>& operator *= (Vec<_Tp, cn>& a, double alpha)
 {
     for( int i = 0; i < cn; i++ )
         a[i] = saturate_cast<_Tp>(a[i] * alpha);
-    return a;
-}
-
-template<typename _Tp, int cn> static inline
-Vec<_Tp, cn>& operator /= (Vec<_Tp, cn>& a, int alpha)
-{
-    double ialpha = 1./alpha;
-    for( int i = 0; i < cn; i++ )
-        a[i] = saturate_cast<_Tp>(a[i] * ialpha);
-    return a;
-}
-
-template<typename _Tp, int cn> static inline
-Vec<_Tp, cn>& operator /= (Vec<_Tp, cn>& a, float alpha)
-{
-    float ialpha = 1.f/alpha;
-    for( int i = 0; i < cn; i++ )
-        a[i] = saturate_cast<_Tp>(a[i] * ialpha);
-    return a;
-}
-
-template<typename _Tp, int cn> static inline
-Vec<_Tp, cn>& operator /= (Vec<_Tp, cn>& a, double alpha)
-{
-    double ialpha = 1./alpha;
-    for( int i = 0; i < cn; i++ )
-        a[i] = saturate_cast<_Tp>(a[i] * ialpha);
     return a;
 }
 
@@ -342,6 +311,34 @@ operator * (double alpha, const Vec<_Tp, cn>& a)
     return mul;
 }
 
+/// Division by scalar
+template<typename _Tp, int cn> static inline
+Vec<_Tp, cn>& operator /= (Vec<_Tp, cn>& a, int alpha)
+{
+    double ialpha = 1./alpha;
+    for( int i = 0; i < cn; i++ )
+        a[i] = saturate_cast<_Tp>(a[i] * ialpha);
+    return a;
+}
+
+template<typename _Tp, int cn> static inline
+Vec<_Tp, cn>& operator /= (Vec<_Tp, cn>& a, float alpha)
+{
+    float ialpha = 1.f/alpha;
+    for( int i = 0; i < cn; i++ )
+        a[i] = saturate_cast<_Tp>(a[i] * ialpha);
+    return a;
+}
+
+template<typename _Tp, int cn> static inline
+Vec<_Tp, cn>& operator /= (Vec<_Tp, cn>& a, double alpha)
+{
+    double ialpha = 1./alpha;
+    for( int i = 0; i < cn; i++ )
+        a[i] = saturate_cast<_Tp>(a[i] * ialpha);
+    return a;
+}
+
 template<typename _Tp, int cn> static inline Vec<_Tp, cn>
 operator / (const Vec<_Tp, cn>& a, int alpha)
 {
@@ -369,6 +366,7 @@ operator / (const Vec<_Tp, cn>& a, double alpha)
     return mul;
 }
 
+/// Negation
 template<typename _Tp, int cn> static inline Vec<_Tp, cn>
 operator - (const Vec<_Tp, cn>& a)
 {
@@ -377,6 +375,7 @@ operator - (const Vec<_Tp, cn>& a)
     return t;
 }
 
+/// Quaternion multiplication
 template<typename _Tp> inline Vec<_Tp, 4> operator * (const Vec<_Tp, 4>& v1, const Vec<_Tp, 4>& v2)
 {
     return Vec<_Tp, 4>(saturate_cast<_Tp>(v1[0]*v2[0] - v1[1]*v2[1] - v1[2]*v2[2] - v1[3]*v2[3]),
@@ -385,6 +384,7 @@ template<typename _Tp> inline Vec<_Tp, 4> operator * (const Vec<_Tp, 4>& v1, con
                        saturate_cast<_Tp>(v1[0]*v2[3] + v1[1]*v2[2] - v1[2]*v2[1] + v1[3]*v2[0]));
 }
 
+/// Quaternion multiplication
 template<typename _Tp> inline Vec<_Tp, 4>& operator *= (Vec<_Tp, 4>& v1, const Vec<_Tp, 4>& v2)
 {
     v1 = v1 * v2;

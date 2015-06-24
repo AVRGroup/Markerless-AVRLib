@@ -85,7 +85,7 @@ template<typename _Tp> static inline Rect_<_Tp>& operator &= ( Rect_<_Tp>& a, co
     a.height = std::min(a.y + a.height, b.y + b.height) - y1;
     a.x = x1; a.y = y1;
     if( a.width <= 0 || a.height <= 0 )
-        a = Rect<int>();
+        a = Rect_<int>();
     return a;
 }
 
@@ -151,7 +151,7 @@ inline void RotatedRect::points(Point2f pts[]) const {
    pts[2] = Point2f(center.x - w * std::sin(theta), center.y - w * std::cos(theta));
    pts[3] = Point2f(pts[2].x + 2 * w * std::cos(theta), pts[2].y + 2 * w * std::sin(theta));
 }
-inline Rect<float> RotatedRect::boundingRect() const {
+inline Rect_<float> RotatedRect::boundingRect() const {
    Point2f pts[4];
    this->points(pts);
 
@@ -162,7 +162,7 @@ inline Rect<float> RotatedRect::boundingRect() const {
       if(max.x < pts[i].x) max.x = pts[i].x;
       if(max.y < pts[i].y) max.y = pts[i].y;
    }
-   return Rect<float>(min, max);
+   return Rect_<float>(min, max);
 }
 
 } // namespace cv
