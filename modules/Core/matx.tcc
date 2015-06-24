@@ -223,26 +223,6 @@ Matx<_Tp,m,n> Matx<_Tp,m,n>::diag(const typename Matx<_Tp,m,n>::diag_type& d)
     return M;
 }
 
-/** TEMP
-template<typename _Tp, int m, int n> inline
-Matx<_Tp,m,n> Matx<_Tp,m,n>::randu(_Tp a, _Tp b)
-{
-    Matx<_Tp,m,n> M;
-    Mat matM(M, false);
-    cv::randu(matM, Scalar(a), Scalar(b));
-    return M;
-}
-
-template<typename _Tp, int m, int n> inline
-Matx<_Tp,m,n> Matx<_Tp,m,n>::randn(_Tp a, _Tp b)
-{
-    Matx<_Tp,m,n> M;
-    Mat matM(M, false);
-    cv::randn(matM, Scalar(a), Scalar(b));
-    return M;
-}
-*/
-
 template<typename _Tp, int m, int n> template<typename T2>
 inline Matx<_Tp, m, n>::operator Matx<T2, m, n>() const
 {
@@ -333,21 +313,12 @@ _Tp& Matx<_Tp, m, n>::operator ()(int i)
     return val[i];
 }
 
-
+/// Adition
 template<typename _Tp1, typename _Tp2, int m, int n> static inline
 Matx<_Tp1, m, n>& operator += (Matx<_Tp1, m, n>& a, const Matx<_Tp2, m, n>& b)
 {
     for( int i = 0; i < m*n; i++ )
         a.val[i] = saturate_cast<_Tp1>(a.val[i] + b.val[i]);
-    return a;
-}
-
-
-template<typename _Tp1, typename _Tp2, int m, int n> static inline
-Matx<_Tp1, m, n>& operator -= (Matx<_Tp1, m, n>& a, const Matx<_Tp2, m, n>& b)
-{
-    for( int i = 0; i < m*n; i++ )
-        a.val[i] = saturate_cast<_Tp1>(a.val[i] - b.val[i]);
     return a;
 }
 
@@ -360,6 +331,14 @@ Matx<_Tp, m, n> operator + (const Matx<_Tp, m, n>& a, const Matx<_Tp, m, n>& b)
     return sum;
 }
 
+/// Subtraction
+template<typename _Tp1, typename _Tp2, int m, int n> static inline
+Matx<_Tp1, m, n>& operator -= (Matx<_Tp1, m, n>& a, const Matx<_Tp2, m, n>& b)
+{
+    for( int i = 0; i < m*n; i++ )
+        a.val[i] = saturate_cast<_Tp1>(a.val[i] - b.val[i]);
+    return a;
+}
 
 template<typename _Tp, int m, int n> static inline
 Matx<_Tp, m, n> operator - (const Matx<_Tp, m, n>& a, const Matx<_Tp, m, n>& b)
@@ -370,7 +349,7 @@ Matx<_Tp, m, n> operator - (const Matx<_Tp, m, n>& a, const Matx<_Tp, m, n>& b)
     return sub;
 }
 
-
+/// Multiplication by scalar
 template<typename _Tp, int m, int n> static inline
 Matx<_Tp, m, n>& operator *= (Matx<_Tp, m, n>& a, int alpha)
 {
@@ -449,15 +428,7 @@ Matx<_Tp, m, n> operator * (double alpha, const Matx<_Tp, m, n>& a)
     return mul;
 }
 
-template<typename _Tp, int m, int n> static inline
-Matx<_Tp, m, n> operator - (const Matx<_Tp, m, n>& a)
-{
-    Matx<_Tp, m, n> neg;
-    for( int i = 0; i < m*n; i++ )
-        neg.val[i] = -saturate_cast<_Tp>(a.val[i]);
-    return neg;
-}
-
+/// Matrix Multiplication
 template<typename _Tp, int m, int n, int l> static inline
 Matx<_Tp, m, n> operator * (const Matx<_Tp, m, l>& a, const Matx<_Tp, l, n>& b)
 {
@@ -473,6 +444,7 @@ Matx<_Tp, m, n> operator * (const Matx<_Tp, m, l>& a, const Matx<_Tp, l, n>& b)
     return mul;
 }
 
+/// Matrix-Vector Multiplication
 template<typename _Tp, int m, int n> static inline
 Vec<_Tp, m> operator * (const Matx<_Tp, m, n>& a, const Vec<_Tp, n>& b)
 {
@@ -486,6 +458,7 @@ Vec<_Tp, m> operator * (const Matx<_Tp, m, n>& a, const Vec<_Tp, n>& b)
     return mul;
 }
 
+/// Trasformation Matrix Multiplication
 template<typename _Tp> static inline
 Point_<_Tp> operator * (const Matx<_Tp, 2, 2>& a, const Point_<_Tp>& b)
 {
@@ -526,6 +499,17 @@ Scalar operator * (const Matx<float, 4, 4>& a, const Scalar& b)
     return Scalar(mul.val[0], mul.val[1], mul.val[2], mul.val[3]);
 }
 
+/// Negation
+template<typename _Tp, int m, int n> static inline
+Matx<_Tp, m, n> operator - (const Matx<_Tp, m, n>& a)
+{
+    Matx<_Tp, m, n> neg;
+    for( int i = 0; i < m*n; i++ )
+        neg.val[i] = -saturate_cast<_Tp>(a.val[i]);
+    return neg;
+}
+
+/// Per-element Matrix Multiplication
 template<typename _Tp, int m, int n> inline
 Matx<_Tp, m, n> Matx<_Tp, m, n>::mul(const Matx<_Tp, m, n>& a) const
 {
@@ -612,7 +596,7 @@ double trace(const Matx<_Tp, m, n>& a)
 template<typename _Tp, int m, int n> inline
 Matx<_Tp, n, m> Matx<_Tp, m, n>::t() const
 {
-    Matx<_Tp, n, m> transp();
+    Matx<_Tp, n, m> transp;
     for( int i = 0; i < m; i++ )
         for( int j = 0; j < n; j++ )
             transp(j, i) = (*this)(i, j);
@@ -631,9 +615,9 @@ template<typename _Tp, int m> struct Matx_FastInvOp
             b(i, i) = (_Tp)1;
 
         if( method == DECOMP_CHOLESKY )
-            return Cholesky(temp.val, m*sizeof(_Tp), m, b.val, m*sizeof(_Tp), m);
+            return hal::Cholesky(temp.val, m*sizeof(_Tp), m, b.val, m*sizeof(_Tp), m);
 
-        return LU(temp.val, m*sizeof(_Tp), m, b.val, m*sizeof(_Tp), m) != 0;
+        return hal::LU(temp.val, m*sizeof(_Tp), m, b.val, m*sizeof(_Tp), m) != 0;
     }
 };
 
@@ -703,9 +687,9 @@ template<typename _Tp, int m, int n> struct Matx_FastSolveOp
         Matx<_Tp, m, m> temp = a;
         x = b;
         if( method == DECOMP_CHOLESKY )
-            return Cholesky(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n);
+            return hal::Cholesky(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n);
 
-        return LU(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n) != 0;
+        return hal::LU(temp.val, m*sizeof(_Tp), m, x.val, n*sizeof(_Tp), n) != 0;
     }
 };
 

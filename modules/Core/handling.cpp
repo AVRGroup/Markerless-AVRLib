@@ -103,7 +103,8 @@ inline string str (Cod c) {
         case Cod::BadAllocation:    return "Bad Allocation";
         case Cod::BadFlag:          return "Invalid flag";
         case Cod::DividedByZero:    return "Division by zero";
-        case Cod::InvalidArgument:  return "Invalid argument";
+        case Cod::FunctionArgument: return "Invalid function's argument";
+        case Cod::TemplateArgument: return "Invalid template's argument";
         case Cod::NotImplemented:   return "Not implemented";
         case Cod::NullPointer:      return "Null pointer";
         case Cod::OutOfRange:       return "Out of range";
