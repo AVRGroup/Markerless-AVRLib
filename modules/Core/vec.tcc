@@ -49,63 +49,50 @@ namespace cv {
 
 /////////////////////////// short vector (Vec<>) /////////////////////////////
 
-template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec()
-{}
+template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec() {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0)
-    : Matx<_Tp, cn, 1>(v0)
-{}
+    : Matx<_Tp, cn, 1>(v0) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1)
-    : Matx<_Tp, cn, 1>(v0, v1)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2)
-    : Matx<_Tp, cn, 1>(v0, v1, v2)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3, _Tp v4)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3, _Tp v4, _Tp v5)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3,
                                                         _Tp v4, _Tp v5, _Tp v6)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3,
                                                         _Tp v4, _Tp v5, _Tp v6, _Tp v7)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6, v7)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6, v7) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3,
                                                         _Tp v4, _Tp v5, _Tp v6, _Tp v7,
                                                         _Tp v8)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6, v7, v8)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6, v7, v8) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(_Tp v0, _Tp v1, _Tp v2, _Tp v3,
                                                         _Tp v4, _Tp v5, _Tp v6, _Tp v7,
                                                         _Tp v8, _Tp v9)
-    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9)
-{}
+    : Matx<_Tp, cn, 1>(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(const _Tp* values)
-    : Matx<_Tp, cn, 1>(values)
-{}
+    : Matx<_Tp, cn, 1>(values) {}
 
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn>::Vec(const Vec<_Tp, cn>& m)
-    : Matx<_Tp, cn, 1>(m.val)
-{}
+    : Matx<_Tp, cn, 1>(m.val) {}
 
 template<typename _Tp, int cn> inline Vec<_Tp, cn> Vec<_Tp, cn>::all(_Tp alpha)
 {
@@ -383,8 +370,6 @@ template<typename _Tp> inline Vec<_Tp, 4> operator * (const Vec<_Tp, 4>& v1, con
                        saturate_cast<_Tp>(v1[0]*v2[2] - v1[1]*v2[3] + v1[2]*v2[0] + v1[3]*v2[1]),
                        saturate_cast<_Tp>(v1[0]*v2[3] + v1[1]*v2[2] - v1[2]*v2[1] + v1[3]*v2[0]));
 }
-
-/// Quaternion multiplication
 template<typename _Tp> inline Vec<_Tp, 4>& operator *= (Vec<_Tp, 4>& v1, const Vec<_Tp, 4>& v2)
 {
     v1 = v1 * v2;
@@ -395,6 +380,15 @@ template<typename _Tp, int cn> inline Vec<_Tp, cn> normalize(const Vec<_Tp, cn>&
 {
     double nv = norm(v);
     return v * (nv ? 1./nv : 0.);
+}
+
+template<typename _Tp, int cn> static inline std::ostream& operator << (std::ostream& out, const Vec<_Tp, cn>& v)
+{
+    out << "[";
+    for(int i = 0; i < cn; i++)
+        out << v[i] << ", ";
+    out << "\b\b]";
+    return out;
 }
 
 } //namespace cv

@@ -52,9 +52,7 @@ namespace cv {
 //////////////////////////////// Matx /////////////////////////////////
 
 template<typename _Tp, int m, int n> inline Matx<_Tp, m, n>::Matx()
-{
-    for(int i = 0; i < channels; i++) val[i] = _Tp(0);
-}
+{ for(int i = 0; i < channels; i++) val[i] = _Tp(0); }
 
 template<typename _Tp, int m, int n> inline Matx<_Tp, m, n>::Matx(_Tp v0)
 {
@@ -178,15 +176,11 @@ template<typename _Tp, int m, int n> inline Matx<_Tp, m, n> Matx<_Tp, m, n>::all
 
 template<typename _Tp, int m, int n> inline
 Matx<_Tp,m,n> Matx<_Tp,m,n>::zeros()
-{
-    return all(0);
-}
+{ return all(0); }
 
 template<typename _Tp, int m, int n> inline
 Matx<_Tp,m,n> Matx<_Tp,m,n>::ones()
-{
-    return all(1);
-}
+{ return all(1); }
 
 template<typename _Tp, int m, int n> inline
 Matx<_Tp,m,n> Matx<_Tp,m,n>::eye()
@@ -756,6 +750,17 @@ Vec<_Tp, n> Matx<_Tp, m, n>::solve(const Vec<_Tp, m>& rhs, int method) const
 {
     Matx<_Tp, n, 1> x = solve(reinterpret_cast<const Matx<_Tp, m, 1>&>(rhs), method);
     return reinterpret_cast<Vec<_Tp, n>&>(x);
+}
+
+template <typename Tp, int r, int c>
+static inline std::ostream& operator << (std::ostream& out, Matx<Tp, r, c> m) {
+   out << "[";
+   for(int i = 0; i < r; i++) {
+      for(int j = 0; j < c; j++)
+         out << m(i, j) << ", ";
+      out << "\b\b" << std::endl;
+   }
+   return (out << "]");
 }
 
 } // namespace cv

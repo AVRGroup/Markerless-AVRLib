@@ -102,6 +102,8 @@ template<typename _Tp> template<typename _Tp2> inline Rect_<_Tp>::operator Rect_
 { return Rect_<_Tp2>(saturate_cast<_Tp2>(x), saturate_cast<_Tp2>(y),
                      saturate_cast<_Tp2>(width), saturate_cast<_Tp2>(height)); }
 
+template<typename _Tp> inline bool Rect_<_Tp>::contains(const Point_<_Tp>& pt) const
+{ return x <= pt.x && pt.x < x + width && y <= pt.y && pt.y < y + height; }
 
 template<typename _Tp> static inline bool operator == (const Rect_<_Tp>& a, const Rect_<_Tp>& b)
 {
@@ -137,6 +139,17 @@ template<typename _Tp> static inline Rect_<_Tp> operator | (const Rect_<_Tp>& a,
     return c |= b;
 }
 
+template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Rect_<_Tp>& b)
+{
+    out <<  "Rect_ Information\n" <<
+            "  min  = " << Point_<_Tp>(b.x, b.y) << "\n" <<
+            "  max  = " << Point_<_Tp>(b.x + b.width, b.y + b.height) << "\n" <<
+            "  size = " << b.size() << "\n";
+    return out;
+}
+template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Rect_<_Tp>& b)
+{ return (in >> b.x >> b.y >> b.width >> b.height); }
+
 //////////////////////////////// RotatedRect ////////////////////////////////
 
 inline RotatedRect::RotatedRect() { angle = 0; }
@@ -144,12 +157,16 @@ inline RotatedRect::RotatedRect(const Point2f& _center, const Size2f& _size, flo
     : center(_center), size(_size), angle(_angle) {}
 
 inline void RotatedRect::points(Point2f pts[]) const {
-   float w = size.width / 2.0;
+   float w2 = size.width / 2.0f;
+   float h2 = size.height / 2.0f;
    float theta = radians(angle);
-   pts[0] = Point2f(center.x + w * std::sin(theta), center.y + w * std::cos(theta));
-   pts[1] = Point2f(pts[0].x - 2 * w * std::cos(theta), pts[0].y - 2 * w * std::sin(theta));
-   pts[2] = Point2f(center.x - w * std::sin(theta), center.y - w * std::cos(theta));
-   pts[3] = Point2f(pts[2].x + 2 * w * std::cos(theta), pts[2].y + 2 * w * std::sin(theta));
+
+   Matx<float, 2, 2> rot(std::cos(theta), -std::sin(theta), std::sin(theta), std::cos(theta));
+
+   pts[0] = center + rot * Point2f(+w2, +h2);
+   pts[1] = center + rot * Point2f(-w2, +h2);
+   pts[2] = center + rot * Point2f(-w2, -h2);
+   pts[3] = center + rot * Point2f(+w2, -h2);
 }
 inline Rect_<float> RotatedRect::boundingRect() const {
    Point2f pts[4];
@@ -162,8 +179,20 @@ inline Rect_<float> RotatedRect::boundingRect() const {
       if(max.x < pts[i].x) max.x = pts[i].x;
       if(max.y < pts[i].y) max.y = pts[i].y;
    }
+
    return Rect_<float>(min, max);
 }
+
+static inline std::ostream& operator << (std::ostream& out, const RotatedRect& b)
+{
+    out <<  "RotatedRect Information\n" <<
+            "  center = " << b.center << "\n" <<
+            "  angle  = " << b.angle << "\n" <<
+            "  size = " << b.size << "\n";
+    return out;
+}
+static inline std::istream& operator >> (std::istream& in, RotatedRect& b)
+{ return (in >> b.center >> b.size >> b.angle); }
 
 } // namespace cv
 

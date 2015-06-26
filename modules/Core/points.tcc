@@ -149,6 +149,10 @@ template<typename _Tp> static inline Point_<_Tp> operator * (const Point_<_Tp>& 
 template<typename _Tp> static inline Point_<_Tp> operator * (double a, const Point_<_Tp>& b)
 { return Point_<_Tp>( saturate_cast<_Tp>(b.x*a), saturate_cast<_Tp>(b.y*a) ); }
 
+template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Point_<_Tp>& b)
+{ return (out << "(" << b.x << ", " << b.y << ")"); }
+template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Point_<_Tp>& b)
+{ return (in >> b.x >> b.y); }
 
 //////////////////////////////// 3D Point ////////////////////////////////
 
@@ -275,6 +279,11 @@ template<typename _Tp> static inline Point3_<_Tp> operator * (double a, const Po
 { return Point3_<_Tp>( saturate_cast<_Tp>(b.x*a),
                       saturate_cast<_Tp>(b.y*a),
                       saturate_cast<_Tp>(b.z*a) ); }
+
+template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Point3_<_Tp>& b)
+{ return (out << "(" << b.x << ", " << b.y << ", " << b.z << ")"); }
+template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Point3_<_Tp>& b)
+{ return (in >> b.x >> b.y >> b.z); }
 
 } // namespace cv
 

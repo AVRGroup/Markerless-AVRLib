@@ -79,15 +79,6 @@ using avr::_PI4;
 using avr::degrees;
 using avr::radians;
 
-using std::cos;
-using std::sin;
-using std::max;
-using std::min;
-using std::exp;
-using std::log;
-using std::pow;
-using std::sqrt;
-
 /////////////// saturate_cast (used in image & signal processing) ///////////////////
 
 template<typename _Tp> static inline _Tp saturate_cast(unsigned char v)    { return _Tp(v); }
@@ -109,82 +100,81 @@ inline double fast_abs(double v)       { return std::abs(v); }
 
 //////////////////////////////// Size ////////////////////////////////
 
-template<typename _Tp> inline Size_<_Tp>::Size_()
-    : width(0), height(0) {}
-template<typename _Tp> inline Size_<_Tp>::Size_(_Tp _width, _Tp _height)
-    : width(_width), height(_height) {}
-template<typename _Tp> inline Size_<_Tp>::Size_(const Size_& sz)
-    : width(sz.width), height(sz.height) {}
+template<typename _Tp> inline Size_<_Tp>::Size_() : width(0), height(0) {}
+template<typename _Tp> inline Size_<_Tp>::Size_(_Tp _width, _Tp _height) : width(_width), height(_height) {}
+template<typename _Tp> inline Size_<_Tp>::Size_(const Size_& sz) : width(sz.width), height(sz.height) {}
 template<typename _Tp> inline Size_<_Tp>::Size_(const Point_<_Tp>& pt) : width(pt.x), height(pt.y) {}
 
 template<typename _Tp> inline _Tp Size_<_Tp>::area() const { return width*height; }
 
 template<typename _Tp> template<typename _Tp2> inline Size_<_Tp>::operator Size_<_Tp2>() const
 { return Size_<_Tp2>(saturate_cast<_Tp2>(width), saturate_cast<_Tp2>(height)); }
+
 template<typename _Tp> inline Size_<_Tp>& Size_<_Tp>::operator = (const Size_<_Tp>& sz)
 { width = sz.width; height = sz.height; return *this; }
-template<typename _Tp> static inline Size_<_Tp> operator * (const Size_<_Tp>& a, _Tp b)
-{ return Size_<_Tp>(a.width * b, a.height * b); }
+template<typename _Tp> static inline Size_<_Tp>& operator += (Size_<_Tp>& a, const Size_<_Tp>& b)
+{ a.width += b.width; a.height += b.height; return a; }
+template<typename _Tp> static inline Size_<_Tp>& operator -= (Size_<_Tp>& a, const Size_<_Tp>& b)
+{ a.width -= b.width; a.height -= b.height; return a; }
+
 template<typename _Tp> static inline Size_<_Tp> operator + (const Size_<_Tp>& a, const Size_<_Tp>& b)
 { return Size_<_Tp>(a.width + b.width, a.height + b.height); }
 template<typename _Tp> static inline Size_<_Tp> operator - (const Size_<_Tp>& a, const Size_<_Tp>& b)
 { return Size_<_Tp>(a.width - b.width, a.height - b.height); }
 
-template<typename _Tp> static inline Size_<_Tp>& operator += (Size_<_Tp>& a, const Size_<_Tp>& b)
-{ a.width += b.width; a.height += b.height; return a; }
-template<typename _Tp> static inline Size_<_Tp>& operator -= (Size_<_Tp>& a, const Size_<_Tp>& b)
-{ a.width -= b.width; a.height -= b.height; return a; }
+template<typename _Tp> static inline Size_<_Tp> operator * (const Size_<_Tp>& a, _Tp b)
+{ return Size_<_Tp>(a.width * b, a.height * b); }
+template<typename _Tp> static inline Size_<_Tp> operator * (_Tp b, const Size_<_Tp>& a)
+{ return Size_<_Tp>(a.width * b, a.height * b); }
 
 template<typename _Tp> static inline bool operator == (const Size_<_Tp>& a, const Size_<_Tp>& b)
 { return a.width == b.width && a.height == b.height; }
 template<typename _Tp> static inline bool operator != (const Size_<_Tp>& a, const Size_<_Tp>& b)
 { return a.width != b.width || a.height != b.height; }
 
+template <typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Size_<_Tp>& b)
+{ return (out << "[" << b.width << "x" << b.height << "]"); }
+template <typename _Tp> static inline std::istream& operator >> (std::istream& in, Size_<_Tp>& b)
+{ return (in >> b.width >> b.height); }
+
 //////////////////////////////// Range /////////////////////////////////
 
 inline Range::Range() : start(0), end(0) {}
 inline Range::Range(int _start, int _end) : start(_start), end(_end) {}
 
-inline int Range::size() const { return end - start; }
+inline size_t Range::size() const { return end - start; }
 inline bool Range::empty() const { return start == end; }
 inline Range Range::all() { return Range(INT_MIN, INT_MAX); }
 
 static inline bool operator == (const Range& r1, const Range& r2)
 { return r1.start == r2.start && r1.end == r2.end; }
-
 static inline bool operator != (const Range& r1, const Range& r2)
 { return !(r1 == r2); }
-
 static inline bool operator !(const Range& r)
 { return r.start == r.end; }
 
-static inline Range operator & (const Range& r1, const Range& r2)
-{
+static inline Range operator & (const Range& r1, const Range& r2) {
     Range r(std::max(r1.start, r2.start), std::min(r1.end, r2.end));
     r.end = std::max(r.end, r.start);
     return r;
 }
 
-static inline Range& operator &= (Range& r1, const Range& r2)
-{
+static inline Range& operator &= (Range& r1, const Range& r2) {
     r1 = r1 & r2;
     return r1;
 }
 
 static inline Range operator + (const Range& r1, int delta)
-{
-    return Range(r1.start + delta, r1.end + delta);
-}
-
+{ return Range(r1.start + delta, r1.end + delta); }
 static inline Range operator + (int delta, const Range& r1)
-{
-    return Range(r1.start + delta, r1.end + delta);
-}
-
+{ return Range(r1.start + delta, r1.end + delta); }
 static inline Range operator - (const Range& r1, int delta)
-{
-    return r1 + (-delta);
-}
+{ return r1 + (-delta); }
+
+static inline std::ostream& operator << (std::ostream& out, const Range& r)
+{ return (out << "[" << r.start << ":" << r.end << "]"); }
+static inline std::istream& operator >> (std::istream& in, Range& r)
+{ return (in >> r.start >> r.end); }
 
 } // namespace cv
 

@@ -312,7 +312,7 @@ class Range
 public:
     Range();
     Range(int _start, int _end);
-    int size() const;
+    size_t size() const;
     bool empty() const;
     static Range all();
 
@@ -495,10 +495,10 @@ public:
 
 // templates implementation and operations
 #include "common.tcc"
-#include "points.tcc"
-#include "rectangles.tcc"
 #include "matx.tcc"
 #include "vec.tcc"
 #include "scalar.tcc"
+#include "points.tcc"
+#include "rectangles.tcc"
 
 #endif
