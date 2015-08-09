@@ -57,23 +57,38 @@
     #define AVR_FUNC ""
 #endif
 
+///@def AVR_ERROR macro function: it prints a message error and finished running
+///     Usage: AVR_ERROR(<error code>, "your message")
+///        Ex: int* number = new int;
+///            if(!number)
+///               AVR_ERROR(Cod::BadAllocation, "memory error");
 #define AVR_ERROR( code, msg ) avr::error( avr::Exception(code, msg, AVR_FUNC, __FILE__, __LINE__) )
+///@def AVR_ASSERT macro function: it compares an expression, if it is false then an assertion error is throws
+///     Usage: AVR_ASSERT(<your expression>)
+///        Ex: AVR_ASSERT(denominator != 0);
+///            return (numerator / denominator);
 #define AVR_ASSERT( expr ) if(expr); else avr::error( avr::Exception(Cod::AssertionFailed, #expr, AVR_FUNC, __FILE__, __LINE__) )
 
+///@def AVR_DBG_ASSERT macro function: the same of AVR_ASSERT but the expression is checked only in debug mode
 #ifdef _DEBUG
     #define AVR_DBG_ASSERT(expr) AVR_ASSERT(expr)
 #else
     #define AVR_DBG_ASSERT(expr)
 #endif
 
+/// @enum ERROR_COD defines error code flags
+// C++11
 #if __cplusplus > 199711L
-    enum class Cod : uint8_t {
+    #define Cod ERROR_COD
+    enum class ERROR_COD : uint8_t {
 #else
-    enum Cod {
+    #define Cod
+    enum ERROR_COD {
 #endif // __cplusplus
         AssertionFailed = 101,  //!< not passed in assert condition
         FunctionArgument,       //!< any function's argument is invalid
         TemplateArgument,       //!< any template's argument is invalid
+        UnsupportedFormat,      //!< matrix type is unsupported
         OutOfRange,             //!< exceeded array size
         NullPointer,            //!< the pointer is null
         DividedByZero,          //!< division by 0
@@ -95,7 +110,7 @@ public:
      Full constructor. Normally the constuctor is not called explicitly.
      Instead, the macros AVR_ERROR() and AVR_ASSERT() are used.
     */
-    Exception(Cod _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line);
+    Exception(ERROR_COD _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line);
     virtual ~Exception() throw();
 
     /*!
@@ -104,7 +119,7 @@ public:
     virtual const char *what() const throw();
     void formatMessage();
 
-    Cod id;
+    ERROR_COD   id;
     std::string msg; ///< the formatted error message
     std::string err; ///< error description
     std::string func; ///< function name. Available only when the compiler supports getting it

@@ -40,64 +40,23 @@
 //
 //M*/
 
-#if !defined(AVR_CORE_COMMON_TCC) && !defined(__OPENCV_CORE_OPERATIONS_HPP__)
-#define AVR_CORE_COMMON_TCC
+//  This file implements the classes
+//    - Size_<>
+//    - Range
+//    - AutoBuffer<>
+//    - RNG
 
-#ifndef SKIP_INCLUDES
-   #include <string.h>
-   #include <limits.h>
-#endif // SKIP_INCLUDES
+#if !defined(AVR_CORE_BASIC_TCC) && !defined(__OPENCV_CORE_OPERATIONS_HPP__)
+#define AVR_CORE_BASIC_TCC
 
 #ifdef __cplusplus
 
-#include <cmath>
-#include <limits>
-
-namespace avr {
-   const double _PI     = 4.0 * std::atan(1.0);
-   const double _2PI    = 2.0 * _PI;
-   const double _PI2    = _PI / 2.0;
-   const double _PI4    = _PI / 4.0;
-   const double _TORAD  = _PI / 180.0;
-   const double _TODEG  = 180.0 / _PI;
-
-   #if __cplusplus > 199711L // C++11
-      inline constexpr double degrees(double rad) { return rad * _TODEG; }
-      inline constexpr double radians(double deg) { return deg * _TORAD; }
-   #else
-      inline double degrees(double rad) { return rad * _TODEG; }
-      inline double radians(double deg) { return deg * _TORAD; }
-   #endif // __cplusplus
-}
+#ifndef size_t
+    typedef unsigned int size_t;
+#endif // size_t
 
 namespace cv {
-
-using avr::_PI;
-using avr::_2PI;
-using avr::_PI2;
-using avr::_PI4;
-using avr::degrees;
-using avr::radians;
-
-/////////////// saturate_cast (used in image & signal processing) ///////////////////
-
-template<typename _Tp> static inline _Tp saturate_cast(unsigned char v)    { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(signed char v)      { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(unsigned short v)   { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(short v)            { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(unsigned v)         { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(int v)              { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(float v)            { return _Tp(v); }
-template<typename _Tp> static inline _Tp saturate_cast(double v)           { return _Tp(v); }
-
-inline int fast_abs(unsigned char v)   { return v; }
-inline int fast_abs(signed char v)     { return std::abs((int)v); }
-inline int fast_abs(unsigned short v)  { return v; }
-inline int fast_abs(short v)           { return std::abs((int)v); }
-inline int fast_abs(int v)             { return std::abs(v); }
-inline float fast_abs(float v)         { return std::abs(v); }
-inline double fast_abs(double v)       { return std::abs(v); }
-
+// begin operations.hpp
 //////////////////////////////// Size ////////////////////////////////
 
 template<typename _Tp> inline Size_<_Tp>::Size_() : width(0), height(0) {}
@@ -132,10 +91,12 @@ template<typename _Tp> static inline bool operator == (const Size_<_Tp>& a, cons
 template<typename _Tp> static inline bool operator != (const Size_<_Tp>& a, const Size_<_Tp>& b)
 { return a.width != b.width || a.height != b.height; }
 
+// begin avr
 template <typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Size_<_Tp>& b)
 { return (out << "[" << b.width << "x" << b.height << "]"); }
 template <typename _Tp> static inline std::istream& operator >> (std::istream& in, Size_<_Tp>& b)
 { return (in >> b.width >> b.height); }
+// end avr
 
 //////////////////////////////// Range /////////////////////////////////
 
@@ -171,10 +132,88 @@ static inline Range operator + (int delta, const Range& r1)
 static inline Range operator - (const Range& r1, int delta)
 { return r1 + (-delta); }
 
+// begin avr
 static inline std::ostream& operator << (std::ostream& out, const Range& r)
 { return (out << "[" << r.start << ":" << r.end << "]"); }
 static inline std::istream& operator >> (std::istream& in, Range& r)
 { return (in >> r.start >> r.end); }
+// end avr
+
+/////////////////////////////// AutoBuffer ////////////////////////////////////////
+
+template<typename _Tp, size_t fixed_size> inline AutoBuffer<_Tp, fixed_size>::AutoBuffer()
+{
+    ptr = buf;
+    size = fixed_size;
+}
+
+template<typename _Tp, size_t fixed_size> inline AutoBuffer<_Tp, fixed_size>::AutoBuffer(size_t _size)
+{
+    ptr = buf;
+    size = fixed_size;
+    allocate(_size);
+}
+
+template<typename _Tp, size_t fixed_size> inline AutoBuffer<_Tp, fixed_size>::~AutoBuffer()
+{ deallocate(); }
+
+template<typename _Tp, size_t fixed_size> inline void AutoBuffer<_Tp, fixed_size>::allocate(size_t _size)
+{
+    if(_size <= size)
+        return;
+    deallocate();
+    if(_size > fixed_size)
+    {
+        ptr = cv::allocate<_Tp>(_size);
+        size = _size;
+    }
+}
+
+template<typename _Tp, size_t fixed_size> inline void AutoBuffer<_Tp, fixed_size>::deallocate()
+{
+    if( ptr != buf )
+    {
+        cv::deallocate<_Tp>(ptr, size);
+        ptr = buf;
+        size = fixed_size;
+    }
+}
+
+template<typename _Tp, size_t fixed_size> inline AutoBuffer<_Tp, fixed_size>::operator _Tp* ()
+{ return ptr; }
+
+template<typename _Tp, size_t fixed_size> inline AutoBuffer<_Tp, fixed_size>::operator const _Tp* () const
+{ return ptr; }
+
+////////////////////////////////////// Multiply-with-Carry RNG //////////////////////////////////////////////
+
+inline RNG::RNG() { state = 0xffffffff; }
+inline RNG::RNG(uint64 _state) { state = _state ? _state : 0xffffffff; }
+inline unsigned RNG::next()
+{
+    state = (uint64)(unsigned)state*CV_RNG_COEFF + (unsigned)(state >> 32);
+    return (unsigned)state;
+}
+
+inline RNG::operator uchar() { return (uchar)next(); }
+inline RNG::operator schar() { return (schar)next(); }
+inline RNG::operator ushort() { return (ushort)next(); }
+inline RNG::operator short() { return (short)next(); }
+inline RNG::operator unsigned() { return next(); }
+inline unsigned RNG::operator ()(unsigned N) {return (unsigned)uniform(0,N);}
+inline unsigned RNG::operator ()() {return next();}
+inline RNG::operator int() { return (int)next(); }
+// * (2^32-1)^-1
+inline RNG::operator float() { return next()*2.3283064365386962890625e-10f; }
+inline RNG::operator double()
+{
+    unsigned t = next();
+    return (((uint64)t << 32) | next())*5.4210108624275221700372640043497e-20;
+}
+inline int RNG::uniform(int a, int b) { return a == b ? a : (int)(next()%(b - a) + a); }
+inline float RNG::uniform(float a, float b) { return ((float)*this)*(b - a) + a; }
+inline double RNG::uniform(double a, double b) { return ((double)*this)*(b - a) + a; }
+// end operations.hpp
 
 } // namespace cv
 

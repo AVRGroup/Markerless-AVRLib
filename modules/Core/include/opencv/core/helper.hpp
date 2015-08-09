@@ -235,17 +235,17 @@ public:
     typedef Vec<channel_type, channels> vec_type;
 };
 
-//template<typename _Tp> class DataType<Complex<_Tp> >
-//{
-//public:
-//    typedef Complex<_Tp> value_type;
-//    typedef value_type work_type;
-//    typedef _Tp channel_type;
-//    enum { generic_type = 0, depth = DataDepth<channel_type>::value, channels = 2,
-//           fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
-//           type = CV_MAKETYPE(depth, channels) };
-//    typedef Vec<channel_type, channels> vec_type;
-//};
+template<typename _Tp> class DataType<Complex<_Tp> >
+{
+public:
+    typedef Complex<_Tp> value_type;
+    typedef value_type work_type;
+    typedef _Tp channel_type;
+    enum { generic_type = 0, depth = DataDepth<channel_type>::value, channels = 2,
+           fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
+           type = CV_MAKETYPE(depth, channels) };
+    typedef Vec<channel_type, channels> vec_type;
+};
 
 template<typename _Tp> class DataType<Point_<_Tp> >
 {
@@ -317,6 +317,91 @@ public:
            fmt = ((channels-1)<<8) + DataDepth<channel_type>::fmt,
            type = CV_MAKETYPE(depth, channels) };
     typedef Vec<channel_type, channels> vec_type;
+};
+
+////////////////////////////////////// NAryMatIterator //////////////////////////////////////////
+/*!
+ n-Dimensional Dense Matrix Iterator Class.
+
+ The class cv::NAryMatIterator is used for iterating over one or more n-dimensional dense arrays (cv::Mat's).
+
+ The iterator is completely different from cv::Mat_ and cv::SparseMat_ iterators.
+ It iterates through the slices (or planes), not the elements, where "slice" is a continuous part of the arrays.
+
+ Here is the example on how the iterator can be used to normalize 3D histogram:
+
+ \code
+ void normalizeColorHist(Mat& hist)
+ {
+ #if 1
+     // intialize iterator (the style is different from STL).
+     // after initialization the iterator will contain
+     // the number of slices or planes
+     // the iterator will go through
+     Mat* arrays[] = { &hist, 0 };
+     Mat planes[1];
+     NAryMatIterator it(arrays, planes);
+     double s = 0;
+     // iterate through the matrix. on each iteration
+     // it.planes[i] (of type Mat) will be set to the current plane of
+     // i-th n-dim matrix passed to the iterator constructor.
+     for(int p = 0; p < it.nplanes; p++, ++it)
+        s += sum(it.planes[0])[0];
+     it = NAryMatIterator(hist);
+     s = 1./s;
+     for(int p = 0; p < it.nplanes; p++, ++it)
+        it.planes[0] *= s;
+ #elif 1
+     // this is a shorter implementation of the above
+     // using built-in operations on Mat
+     double s = sum(hist)[0];
+     hist.convertTo(hist, hist.type(), 1./s, 0);
+ #else
+     // and this is even shorter one
+     // (assuming that the histogram elements are non-negative)
+     normalize(hist, hist, 1, 0, NORM_L1);
+ #endif
+ }
+ \endcode
+
+ You can iterate through several matrices simultaneously as long as they have the same geometry
+ (dimensionality and all the dimension sizes are the same), which is useful for binary
+ and n-ary operations on such matrices. Just pass those matrices to cv::MatNDIterator.
+ Then, during the iteration it.planes[0], it.planes[1], ... will
+ be the slices of the corresponding matrices
+*/
+class NAryMatIterator
+{
+public:
+    //! the default constructor
+    NAryMatIterator();
+    //! the full constructor taking arbitrary number of n-dim matrices
+    NAryMatIterator(const Mat** arrays, uchar** ptrs, int narrays=-1);
+    //! the full constructor taking arbitrary number of n-dim matrices
+    NAryMatIterator(const Mat** arrays, Mat* planes, int narrays=-1);
+    //! the separate iterator initialization method
+    void init(const Mat** arrays, Mat* planes, uchar** ptrs, int narrays=-1);
+
+    //! proceeds to the next plane of every iterated matrix
+    NAryMatIterator& operator ++();
+    //! proceeds to the next plane of every iterated matrix (postfix increment operator)
+    NAryMatIterator operator ++(int);
+
+    //! the iterated arrays
+    const Mat** arrays;
+    //! the current planes
+    Mat* planes;
+    //! data pointers
+    uchar** ptrs;
+    //! the number of arrays
+    int narrays;
+    //! the number of hyper-planes that the iterator steps through
+    size_t nplanes;
+    //! the size of each segment (in elements)
+    size_t size;
+protected:
+    int iterdepth;
+    size_t idx;
 };
 
 } // namespace cv

@@ -7,13 +7,11 @@
 //  copy or use the software.
 //
 //
-//                          License Agreement
+//                           License Agreement
 //                For Open Source Computer Vision Library
 //
 // Copyright (C) 2000-2008, Intel Corporation, all rights reserved.
 // Copyright (C) 2009, Willow Garage Inc., all rights reserved.
-// Copyright (C) 2013, OpenCV Foundation, all rights reserved.
-// Copyright (C) 2015, Itseez Inc., all rights reserved.
 // Third party copyrights are property of their respective owners.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -42,31 +40,45 @@
 //
 //M*/
 
-#ifndef AVR_CORE_MATRIX_HH
+//This file implements the functions:
+//    - cv::fastMalloc
+//    - cv::fastFree
 
-#ifndef size_t
-    typedef unsigned int size_t;
-#endif // size_t
+#include "precomp.hpp"
+#include <sstream>
 
-#ifdef __cplusplus
-
+// begin alloc.cpp
 namespace cv {
-namespace HardwareAccelerationLayer {
-//////////////////////////////// low-level functions ////////////////////////////////
-
-/* ----------- LU & Cholesky decomposition for small matrices ----------- */
-
-int LU(float* A, size_t astep, int m, float* b, size_t bstep, int n);
-int LU(double* A, size_t astep, int m, double* b, size_t bstep, int n);
-bool Cholesky(float* A, size_t astep, int m, float* b, size_t bstep, int n);
-bool Cholesky(double* A, size_t astep, int m, double* b, size_t bstep, int n);
-
-} // namespace hal
-
-namespace hal = HardwareAccelerationLayer;
+static void* OutOfMemoryError(size_t size)
+{
+    std::stringstream stream;
+    stream << "Failed to allocate " << size << "bytes";
+    AVR_ERROR(Cod::BadAllocation, stream.str());
+    return 0;
+}
 
 } // namespace cv
 
-#endif // __cplusplus
+void* cv::fastMalloc( size_t size )
+{
+    uchar* udata = (uchar*)malloc(size + sizeof(void*) + CV_MALLOC_ALIGN);
+    if(!udata)
+        return OutOfMemoryError(size);
+    uchar** adata = alignPtr((uchar**)udata + 1, CV_MALLOC_ALIGN);
+    adata[-1] = udata;
+    return adata;
+}
 
-#endif // AVR_CORE_MATRIX_HH
+void cv::fastFree(void* ptr)
+{
+    if(ptr)
+    {
+        uchar* udata = ((uchar**)ptr)[-1];
+        AVR_DBG_ASSERT(udata < (uchar*)ptr &&
+               ((uchar*)ptr - udata) <= (ptrdiff_t)(sizeof(void*)+CV_MALLOC_ALIGN));
+        free(udata);
+    }
+}
+// end alloc.cpp
+
+/* End of file. */

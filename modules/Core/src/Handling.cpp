@@ -44,7 +44,7 @@
 #include <cstdio>
 #include <cstdarg>
 
-#include "handling.hpp"
+#include <avr/core/Handling.hpp>
 
 #if defined(_WIN32) || defined(WIN32) || defined(WINCE)
     #include <windows.h>
@@ -69,10 +69,10 @@ using std::string;
 using std::stringstream;
 
 //! convert code to description string
-static string str (Cod c);
+static string str (ERROR_COD c);
 static string format(const char* fmt, ...);
 
-avr::Exception::Exception(Cod _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line) :
+avr::Exception::Exception(ERROR_COD _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line) :
     id(_id), msg(""), err(_err), func(_func), file(_file), line(_line)
     {this->formatMessage();}
 
@@ -97,18 +97,19 @@ void avr::error(const avr::Exception& exc){
     throw exc;
 }
 
-inline string str (Cod c) {
+inline string str (ERROR_COD c) {
     switch(c){
-        case Cod::AssertionFailed:  return "Assertion failed";
-        case Cod::BadAllocation:    return "Bad Allocation";
-        case Cod::BadFlag:          return "Invalid flag";
-        case Cod::DividedByZero:    return "Division by zero";
-        case Cod::FunctionArgument: return "Invalid function's argument";
-        case Cod::TemplateArgument: return "Invalid template's argument";
-        case Cod::NotImplemented:   return "Not implemented";
-        case Cod::NullPointer:      return "Null pointer";
-        case Cod::OutOfRange:       return "Out of range";
-        default: /* Unknown */      return "Unspecified error";
+        case Cod::AssertionFailed:      return "Assertion failed";
+        case Cod::BadAllocation:        return "Bad Allocation";
+        case Cod::BadFlag:              return "Invalid flag";
+        case Cod::DividedByZero:        return "Division by zero";
+        case Cod::FunctionArgument:     return "Invalid function's argument";
+        case Cod::TemplateArgument:     return "Invalid template's argument";
+        case Cod::UnsupportedFormat:    return "Unsupported format of matrix";
+        case Cod::NotImplemented:       return "Not implemented";
+        case Cod::NullPointer:          return "Null pointer";
+        case Cod::OutOfRange:           return "Out of range";
+        default: /* Unknown */          return "Unspecified error";
     }
 }
 

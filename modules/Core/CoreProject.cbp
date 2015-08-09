@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="TestCoreModule" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="DebugC++11">
+				<Option output="bin/CoreDbg11" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/" />
+				<Option object_output="bin/Obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+			</Target>
+			<Target title="ReleaseC++11">
+				<Option output="bin/Core11" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/" />
+				<Option object_output="bin/Obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O" />
+					<Add option="-std=c++11" />
+				</Compiler>
+			</Target>
+			<Target title="Debug">
+				<Option output="bin/CoreDbg" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/" />
+				<Option object_output="bin/Obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Core" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin/" />
+				<Option object_output="bin/Obj/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="include" />
+		</Compiler>
+		<Unit filename="include/avr/core/Handling.hpp" />
+		<Unit filename="include/avr/core/SafePointer.hpp" />
+		<Unit filename="include/opencv/core/core.hpp" />
+		<Unit filename="include/opencv/core/expressions.hpp" />
+		<Unit filename="include/opencv/core/functions.hpp" />
+		<Unit filename="include/opencv/core/helper.hpp" />
+		<Unit filename="include/opencv/core/types.hpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="src/Handling.cpp" />
+		<Unit filename="src/opencv/alloc.cpp" />
+		<Unit filename="src/opencv/arithm.cpp" />
+		<Unit filename="src/opencv/convert.cpp" />
+		<Unit filename="src/opencv/copy.cpp" />
+		<Unit filename="src/opencv/lapack.cpp" />
+		<Unit filename="src/opencv/matexpr.cpp" />
+		<Unit filename="src/opencv/matmul.cpp" />
+		<Unit filename="src/opencv/matrix.cpp" />
+		<Unit filename="src/opencv/norm.cpp" />
+		<Unit filename="src/opencv/tables.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
