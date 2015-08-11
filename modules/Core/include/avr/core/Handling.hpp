@@ -57,46 +57,57 @@
     #define AVR_FUNC ""
 #endif
 
-///@def AVR_ERROR macro function: it prints a message error and finished running
-///     Usage: AVR_ERROR(<error code>, "your message")
-///        Ex: int* number = new int;
-///            if(!number)
-///               AVR_ERROR(Cod::BadAllocation, "memory error");
+/** @def AVR_ERROR macro function: it prints a message error and finished running
+ *  Usage: AVR_ERROR(<error code>, "your message")
+ *  Ex: AVR_ERROR(Cod::BadAllocation, "memory error");
+ */
 #define AVR_ERROR( code, msg ) avr::error( avr::Exception(code, msg, AVR_FUNC, __FILE__, __LINE__) )
-///@def AVR_ASSERT macro function: it compares an expression, if it is false then an assertion error is throws
-///     Usage: AVR_ASSERT(<your expression>)
-///        Ex: AVR_ASSERT(denominator != 0);
-///            return (numerator / denominator);
+
+/** @def AVR_FMT_ERROR macro function: the same of AVR_ERROR but with a formatted message error
+ *  Usage: AVR_FMT_ERROR(<error code>, "format mask", <args>)
+ *  Ex: AVR_FMT_ERROR(Cod::Undefined, "%d is not within the range", value);
+ */
+#define AVR_FMT_ERROR( code, fmt, ... ) avr::error( avr::Exception(code, avr::format(fmt, ##__VA_ARGS__), AVR_FUNC, __FILE__, __LINE__) )
+
+/** @def AVR_ASSERT macro function: it compares an expression, if it is false then an assertion error is throws
+ *  Usage: AVR_ASSERT(<your expression>)
+ *  Ex: AVR_ASSERT(denominator != 0);
+ */
 #define AVR_ASSERT( expr ) if(expr); else avr::error( avr::Exception(Cod::AssertionFailed, #expr, AVR_FUNC, __FILE__, __LINE__) )
 
-///@def AVR_DBG_ASSERT macro function: the same of AVR_ASSERT but the expression is checked only in debug mode
+//! @def AVR_DBG_ASSERT macro function: the same of AVR_ASSERT but the expression is checked only in debug mode
 #ifdef _DEBUG
     #define AVR_DBG_ASSERT(expr) AVR_ASSERT(expr)
 #else
     #define AVR_DBG_ASSERT(expr)
 #endif
 
-/// @enum ERROR_COD defines error code flags
-// C++11
-#if __cplusplus > 199711L
-    #define Cod ERROR_COD
+/** @enum ERROR_COD defines error code flags
+ *  independent of language version uses Cod::SomeFlag
+ */
+#if __cplusplus > 199711L // C++11
     enum class ERROR_COD : uint8_t {
 #else
-    #define Cod
+struct Cod {
     enum ERROR_COD {
 #endif // __cplusplus
         AssertionFailed = 101,  //!< not passed in assert condition
         FunctionArgument,       //!< any function's argument is invalid
         TemplateArgument,       //!< any template's argument is invalid
-        UnsupportedFormat,      //!< matrix type is unsupported
+        MatrixFormat,           //!< matrix type is unsupported
         OutOfRange,             //!< exceeded array size
-        NullPointer,            //!< the pointer is null
-        DividedByZero,          //!< division by 0
+        NullPointer,            //!< attempt to access a null pointer
         NotImplemented,         //!< functionality not implemented yet
         BadAllocation,          //!< memory error
+        BadCasting,             //!< dynamic cast error
         BadFlag,                //!< flag is invalid
-        Unknown                 //!< other
+        Undefined               //!< other
     };
+#if __cplusplus > 199711L // C++11
+    typedef ERROR_COD Cod;
+#else
+    };
+#endif // __cplusplus
 
 namespace avr {
 /*!
@@ -132,6 +143,11 @@ public:
   \param exc the exception raised.
  */
 void error( const Exception& exc );
+/*!
+  Formats a string
+  \param fmt the format mask in c-style
+ */
+std::string format(const char* fmt, ...);
 
 } // namespace avr
 

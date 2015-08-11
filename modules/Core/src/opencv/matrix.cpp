@@ -555,9 +555,9 @@ void Mat::push_back(const Mat& elems)
     bool eq = size == elems.size;
     size.p[0] = r;
     if( !eq )
-        AVR_ERROR(Cod::Unknown, "Unmatched sizes between Mat's");
+        AVR_ERROR(Cod::Undefined, "Unmatched sizes between Mat's");
     if( type() != elems.type() )
-        AVR_ERROR(Cod::Unknown, "Unmatched formats between Mat's");
+        AVR_ERROR(Cod::Undefined, "Unmatched formats between Mat's");
 
     if( isSubmatrix() || dataend + step.p[0]*delta > datalimit )
         reserve( std::max(r + delta, (r*3+1)/2) );
@@ -603,7 +603,7 @@ Mat Mat::reshape(int new_cn, int new_rows) const
     {
         int total_size = total_width * rows;
         if( !isContinuous() )
-            AVR_ERROR(Cod::Unknown,
+            AVR_ERROR(Cod::Undefined,
             "The matrix is not continuous, thus its number of rows can not be changed" );
 
         if( (unsigned)new_rows > (unsigned)total_size )
@@ -715,7 +715,7 @@ void cv::scalarToRawData(const Scalar& s, void* _buf, int type, int unroll_to)
         break;
         }
     default:
-        AVR_ERROR(Cod::UnsupportedFormat,"");
+        AVR_ERROR(Cod::MatrixFormat,"");
     }
 }
 

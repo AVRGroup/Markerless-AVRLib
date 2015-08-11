@@ -1729,7 +1729,7 @@ void cv::mulTransposed( InputArray _src, OutputArray _dst, bool ata, InputArray 
                 func = MulTransposedL<double,double>;
         }
         if( !func )
-            AVR_ERROR(Cod::UnsupportedFormat, "" );
+            AVR_ERROR(Cod::MatrixFormat, "" );
 
         func( src, dst, delta, scale );
         completeSymm( dst, false );

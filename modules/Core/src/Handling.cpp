@@ -70,7 +70,6 @@ using std::stringstream;
 
 //! convert code to description string
 static string str (ERROR_COD c);
-static string format(const char* fmt, ...);
 
 avr::Exception::Exception(ERROR_COD _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line) :
     id(_id), msg(""), err(_err), func(_func), file(_file), line(_line)
@@ -86,12 +85,12 @@ void avr::Exception::formatMessage() {
     if(func.size() > 0)
         this->msg = format("error (%s) in function %s, file %s, line %d", err.c_str(), func.c_str(), file.c_str(), line);
     else
-        this->msg = format("error (%s), file %s, line %d", err.c_str(), func.c_str(), file.c_str(), line);
+        this->msg = format("error (%s), file %s, line %d", err.c_str(), file.c_str(), line);
 }
 
 void avr::error(const avr::Exception& exc){
     YELLOW_TEXT();
-    string buf = format("AVRLIB Error (%d): %s (%s) in file %s:%d", exc.id, str(exc.id).c_str(), exc.err.c_str(), exc.file.c_str(), exc.line);
+    string buf = format("AVRLIB Error (%d): %s (%s) in function %s on file %s:%d", exc.id, str(exc.id).c_str(), exc.err.c_str(), exc.func.c_str(), exc.file.c_str(), exc.line);
     fprintf(stderr, "%s\n", buf.c_str());
     DEFAULT_TEXT();
     throw exc;
@@ -100,20 +99,20 @@ void avr::error(const avr::Exception& exc){
 inline string str (ERROR_COD c) {
     switch(c){
         case Cod::AssertionFailed:      return "Assertion failed";
-        case Cod::BadAllocation:        return "Bad Allocation";
+        case Cod::BadAllocation:        return "Bad allocation";
         case Cod::BadFlag:              return "Invalid flag";
-        case Cod::DividedByZero:        return "Division by zero";
         case Cod::FunctionArgument:     return "Invalid function's argument";
         case Cod::TemplateArgument:     return "Invalid template's argument";
-        case Cod::UnsupportedFormat:    return "Unsupported format of matrix";
+        case Cod::MatrixFormat:         return "Unsupported format of matrix";
         case Cod::NotImplemented:       return "Not implemented";
+        case Cod::BadCasting:           return "Bad casting";
         case Cod::NullPointer:          return "Null pointer";
         case Cod::OutOfRange:           return "Out of range";
-        default: /* Unknown */          return "Unspecified error";
+        default: /* Undefined */        return "Undefined";
     }
 }
 
-string format(const char* fmt, ...) {
+string avr::format(const char* fmt, ...) {
     std::string buf;
     buf.resize(1024);
 

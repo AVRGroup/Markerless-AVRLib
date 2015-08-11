@@ -883,9 +883,10 @@ template <typename Tp, int r, int c>
 static inline std::ostream& operator << (std::ostream& out, Matx<Tp, r, c> m) {
    out << "[";
    for(int i = 0; i < r; i++) {
-      for(int j = 0; j < c; j++)
-         out << m(i, j) << ", ";
-      out << "\b\b" << std::endl;
+      if(i != 0) out << "\n";
+      out << m(i, 0);
+      for(int j = 1; j < c; j++)
+         out << ", " << m(i, j);
    }
    return (out << "]");
 }

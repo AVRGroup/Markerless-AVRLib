@@ -3,8 +3,6 @@
 
 #ifdef __cplusplus
 
-#include <stdexcept>
-
 namespace avr {
 
 template <class T>
@@ -16,9 +14,10 @@ class SafePointer {
       SafePointer(TypePtr* = 0x0);
       //! Copy construtor
       SafePointer(const SafePointer&);
-      //! Copy constructor with conversion @pre template type Dt must be convertible to T (otherwise throws an exception)
-      template <class Dt>
-      SafePointer(SafePointer<Dt>&) throw(std::runtime_error&);
+      //! Copy constructor with conversion @pre template type Dt must be convertible to T
+      template <class Dt> SafePointer(const SafePointer<Dt>&);
+      //! Conversion constructor @pre template type DTypePtr must be convertible to TypePtr
+      template <class DTypePtr> SafePointer(DTypePtr*);
       //! Destructor, deletes the object if there is not another reference for it
       ~SafePointer();
 
@@ -26,16 +25,17 @@ class SafePointer {
       SafePointer& operator = (TypePtr*);
       //! Copy operator
       SafePointer& operator = (const SafePointer&);
-      //! Copy operator with conversion @pre template type Dt must be convertible to T (otherwise throws an exception)
-      template <class Dt>
-      SafePointer& operator = (SafePointer<Dt>&) throw (std::runtime_error&);
+      //! Copy operator with conversion @pre template type Dt must be convertible to T
+      template <class Dt> SafePointer& operator = (const SafePointer<Dt>&);
+      //! Conversion operator by assignment @pre template type Dt must be convertible to T
+      template <class DTypePtr> SafePointer& operator = (DTypePtr*);
 
       //! Dereference operators, access pointer's content in same style of C (*ptr)
-      TypePtr& operator * () throw(std::logic_error&);
-      const TypePtr& operator * () const throw(std::logic_error&);
+      TypePtr& operator * ();
+      const TypePtr& operator * () const;
       //! Dereference member operators, access a member of the object in same style of C (ptr->x)
-      TypePtr* operator -> () throw(std::logic_error&);
-      const TypePtr* operator -> () const throw(std::logic_error&);
+      TypePtr* operator -> ();
+      const TypePtr* operator -> () const;
 
       //! Checks if pointer is null
       inline bool null() const { return this->obj == 0x0; }
@@ -57,17 +57,23 @@ class SafePointer {
       bool operator <  (TypePtr* p) const;
       bool operator >  (TypePtr* p) const;
 
-      inline TypePtr* Get() { return this->obj; }
-      inline const TypePtr* Get() const { return this->obj; }
-      inline const size_t* GetRefCount() const { return this->refCount; }
+      //! Getters
+      TypePtr* Get();
+      const TypePtr* Get() const;
+      //! @return the number of references to same objetc
+      size_t Refs() const;
+
+      template <class Dt> friend class SafePointer;
 
    private:
       TypePtr* obj;        // pointed object
       size_t*  refCount;   // reference counter for the object
 
-      bool noReference() const;
-      void newReference();
+      template <class DTypePtr>
+      void create(DTypePtr*);
       void releases();
+      void newReference();
+      bool noReference() const;
 };
 
 #if __cplusplus > 199711L // C++11

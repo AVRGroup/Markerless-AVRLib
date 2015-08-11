@@ -3,15 +3,47 @@
 #include <cstdio>
 #include <time.h>
 
-#include <opencv/core/core.hpp>
+#include <avr/core/Core.hpp>
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::cin;
 using namespace avr;
 
 int main(int argc, char* args[]){
-    cv::Vec<double, 3> v1(1., 2., 2.);
-    cv::Vec<double, 3> v2(2., 1., 1.);
-    cout << v1.cross(v2);
+   {  /* // Teste BoundingRect<>
+      BoundingRect<int> rec(1, 2, 5, 7);
+      BoundingRect<int> rct(Point(0, 0), Sizei(5, 7));
+      BoundingRect<int> ret(Point(1, 1), Point(0, 7));
+      BoundingRect<int> cpy = rec;
+      BoundingRect<float> cvt = BoundingRect<float>(ret);
 
-    return 0;
+      cout << rec() << endl << rct() << endl << ret() << endl << cpy() << endl << cvt() << endl;
+
+      cout << rec.GetArea() << " " << rct.GetCenter() << " " << ret.GetSize() << endl;
+      cout << rec.Contains(Point(6, 2)) << endl;
+      cout << rec.Intersects(rct) << endl;
+      cout << (rct == ret) << endl;
+      cout << (rct == rec) << endl;
+      cout << (rct != rec) << endl;
+      cout << (rct != ret) << endl;
+
+      cpy = rct;
+      cout << cpy() << endl;
+
+      rec(5, 7, 1, 2);
+      rct(Point(-1, -3), Sizei(3, 2));
+      ret(Point(-2, 5), Point(1, 3));
+
+      cout << rec() << endl << rct() << endl << ret() << endl;
+   */ }
+
+   { // Teste TMatx
+      TMatx m1;
+      TMatx m2 = m1;
+
+      cout << m1() << endl << m2() << endl;
+   }
+
+   return 0;
 }

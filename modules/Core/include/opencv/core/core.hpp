@@ -49,7 +49,6 @@
 #include <complex>
 #include <vector>
 
-#include <avr/core/SafePointer.hpp>
 #include <avr/core/Handling.hpp>
 
 #include "types.hpp"

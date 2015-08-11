@@ -144,8 +144,13 @@
 			<Add option="-fexceptions" />
 			<Add directory="include" />
 		</Compiler>
+		<Unit filename="include/avr/core/Core.hpp" />
 		<Unit filename="include/avr/core/Handling.hpp" />
 		<Unit filename="include/avr/core/SafePointer.hpp" />
+		<Unit filename="include/avr/core/impl/Bounding.tcc" />
+		<Unit filename="include/avr/core/impl/Quaternion.tcc" />
+		<Unit filename="include/avr/core/impl/SafePointer.tcc" />
+		<Unit filename="include/avr/core/impl/TMatx.tcc" />
 		<Unit filename="include/opencv/core/core.hpp" />
 		<Unit filename="include/opencv/core/expressions.hpp" />
 		<Unit filename="include/opencv/core/functions.hpp" />
@@ -158,6 +163,8 @@
 			<Option target="Test" />
 		</Unit>
 		<Unit filename="src/Handling.cpp" />
+		<Unit filename="src/Quaternion.cpp" />
+		<Unit filename="src/TMatx.cpp" />
 		<Unit filename="src/opencv/alloc.cpp" />
 		<Unit filename="src/opencv/arithm.cpp" />
 		<Unit filename="src/opencv/convert.cpp" />

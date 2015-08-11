@@ -1351,7 +1351,7 @@ void MatOp_Bin::assign(const MatExpr& e, Mat& m, int _type) const
     else if( e.flags == 'a' && !e.b.data )
         cv::absdiff(e.a, e.s, dst);
     else
-        AVR_ERROR(Cod::Unknown, "Unknown operation");
+        AVR_ERROR(Cod::Undefined, "Unknown operation");
 
     if( dst.data != m.data )
         dst.convertTo(m, _type);
@@ -1570,7 +1570,7 @@ void MatOp_Initializer::assign(const MatExpr& e, Mat& m, int _type) const
     else if( e.flags == '1' )
         m = Scalar(e.alpha);
     else
-        AVR_ERROR(Cod::Unknown, "Invalid matrix initializer type");
+        AVR_ERROR(Cod::Undefined, "Invalid matrix initializer type");
 }
 
 void MatOp_Initializer::multiply(const MatExpr& e, double s, MatExpr& res) const

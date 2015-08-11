@@ -53,27 +53,19 @@
 #include <cmath>
 #include <limits>
 
-// avrlib's extended funcionalities
-namespace avr {
-   const double _PI     = 4.0 * std::atan(1.0);
-   const double _2PI    = 2.0 * _PI;
-   const double _PI2    = _PI / 2.0;
-   const double _PI4    = _PI / 4.0;
-   const double _TORAD  = _PI / 180.0;
-   const double _TODEG  = 180.0 / _PI;
-
-  inline double degrees(double rad) { return rad * _TODEG; }
-  inline double radians(double deg) { return deg * _TORAD; }
-}
-
 namespace cv {
 
-using avr::_PI;
-using avr::_2PI;
-using avr::_PI2;
-using avr::_PI4;
-using avr::degrees;
-using avr::radians;
+// avrlib's extended funcionalities
+const double _PI     = 4.0 * std::atan(1.0);
+const double _2PI    = 2.0 * _PI;
+const double _PI2    = _PI / 2.0;
+const double _PI4    = _PI / 4.0;
+const double _TORAD  = _PI / 180.0;
+const double _TODEG  = 180.0 / _PI;
+
+inline double degrees(double rad) { return rad * _TODEG; }
+inline double radians(double deg) { return deg * _TORAD; }
+// end avrlib
 
 // File: alloc.cpp
 /*!

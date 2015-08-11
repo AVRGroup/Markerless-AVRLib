@@ -1614,7 +1614,7 @@ void SVD::backSubst( InputArray _w, InputArray _u, InputArray _vt,
                vt.ptr<double>(), vt.step, true, rhs.ptr<double>(), rhs.step, nb,
                dst.ptr<double>(), dst.step, buffer);
     else
-        AVR_ERROR(Cod::UnsupportedFormat, "" );
+        AVR_ERROR(Cod::MatrixFormat, "" );
 }
 
 

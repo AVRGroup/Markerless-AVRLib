@@ -1016,7 +1016,7 @@ static void binary_op(InputArray _src1, InputArray _src2, OutputArray _dst,
             // src1 is a scalar; swap it with src2
             swap(src1, src2);
         else if( !checkScalar(src2, src1.type(), kind2, kind1) )
-            AVR_ERROR(Cod::Unknown,
+            AVR_ERROR(Cod::Undefined,
                       "The operation is neither 'array op array' (where arrays have the same size and type), "
                       "nor 'array op scalar', nor 'scalar op array'" );
         haveScalar = true;
@@ -1282,7 +1282,7 @@ static void arithm_op(InputArray _src1, InputArray _src2, OutputArray _dst,
             swapped12 = true;
         }
         else if( !checkScalar(src2, src1.type(), kind2, kind1) )
-            AVR_ERROR(Cod::Unknown,
+            AVR_ERROR(Cod::Undefined,
                      "The operation is neither 'array op array' (where arrays have the same size and the same number of channels), "
                      "nor 'array op scalar', nor 'scalar op array'" );
         haveScalar = true;
@@ -2481,7 +2481,7 @@ void cv::compare(InputArray _src1, InputArray _src2, OutputArray _dst, int op)
                 op == CMP_GE ? CMP_LE : op == CMP_GT ? CMP_LT : op;
         }
         else if( !checkScalar(src2, src1.type(), kind2, kind1) )
-            AVR_ERROR(Cod::Unknown,
+            AVR_ERROR(Cod::Undefined,
                      "The operation is neither 'array op array' (where arrays have the same size and the same type), "
                      "nor 'array op scalar', nor 'scalar op array'" );
         haveScalar = true;
