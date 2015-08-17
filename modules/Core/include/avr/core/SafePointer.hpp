@@ -6,29 +6,29 @@
 namespace avr {
 
 template <class T>
-class SafePointer {
+class SPtr {
    public:
       typedef T TypePtr;
 
       //! Default and initialize constructor
-      SafePointer(TypePtr* = 0x0);
+      SPtr(TypePtr* = 0x0);
       //! Copy construtor
-      SafePointer(const SafePointer&);
+      SPtr(const SPtr&);
       //! Copy constructor with conversion @pre template type Dt must be convertible to T
-      template <class Dt> SafePointer(const SafePointer<Dt>&);
+      template <class Dt> SPtr(const SPtr<Dt>&);
       //! Conversion constructor @pre template type DTypePtr must be convertible to TypePtr
-      template <class DTypePtr> SafePointer(DTypePtr*);
+      template <class DTypePtr> SPtr(DTypePtr*);
       //! Destructor, deletes the object if there is not another reference for it
-      ~SafePointer();
+      virtual ~SPtr();
 
       //! Assign operator
-      SafePointer& operator = (TypePtr*);
+      SPtr& operator = (TypePtr*);
       //! Copy operator
-      SafePointer& operator = (const SafePointer&);
+      SPtr& operator = (const SPtr&);
       //! Copy operator with conversion @pre template type Dt must be convertible to T
-      template <class Dt> SafePointer& operator = (const SafePointer<Dt>&);
+      template <class Dt> SPtr& operator = (const SPtr<Dt>&);
       //! Conversion operator by assignment @pre template type Dt must be convertible to T
-      template <class DTypePtr> SafePointer& operator = (DTypePtr*);
+      template <class DTypePtr> SPtr& operator = (DTypePtr*);
 
       //! Dereference operators, access pointer's content in same style of C (*ptr)
       TypePtr& operator * ();
@@ -38,17 +38,17 @@ class SafePointer {
       const TypePtr* operator -> () const;
 
       //! Checks if pointer is null
-      inline bool null() const { return this->obj == 0x0; }
+      inline bool Null() const { return this->obj == 0x0; }
 
       //! Unary operator of negation
       bool operator ! () const;
       //! Boolean operators that receive a object
-      bool operator == (const SafePointer&) const;
-      bool operator != (const SafePointer&) const;
-      bool operator <= (const SafePointer&) const;
-      bool operator >= (const SafePointer&) const;
-      bool operator <  (const SafePointer&) const;
-      bool operator >  (const SafePointer&) const;
+      bool operator == (const SPtr&) const;
+      bool operator != (const SPtr&) const;
+      bool operator <= (const SPtr&) const;
+      bool operator >= (const SPtr&) const;
+      bool operator <  (const SPtr&) const;
+      bool operator >  (const SPtr&) const;
       //! Boolean operators that receive a generic c-pointer
       bool operator == (TypePtr* p) const;
       bool operator != (TypePtr* p) const;
@@ -63,7 +63,8 @@ class SafePointer {
       //! @return the number of references to same objetc
       size_t Refs() const;
 
-      template <class Dt> friend class SafePointer;
+      // all classes of this template are friends with each other
+      template <class Dt> friend class SPtr;
 
    private:
       TypePtr* obj;        // pointed object
@@ -75,10 +76,6 @@ class SafePointer {
       void newReference();
       bool noReference() const;
 };
-
-#if __cplusplus > 199711L // C++11
-   template <class T> using SPtr = SafePointer<T>;
-#endif
 
 } //namespace avr
 

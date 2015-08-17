@@ -34,7 +34,6 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O" />
 					<Add option="-std=c++11" />
 				</Compiler>
 			</Target>
@@ -147,10 +146,8 @@
 		<Unit filename="include/avr/core/Core.hpp" />
 		<Unit filename="include/avr/core/Handling.hpp" />
 		<Unit filename="include/avr/core/SafePointer.hpp" />
-		<Unit filename="include/avr/core/impl/Bounding.tcc" />
-		<Unit filename="include/avr/core/impl/Quaternion.tcc" />
+		<Unit filename="include/avr/core/impl/Core.tcc" />
 		<Unit filename="include/avr/core/impl/SafePointer.tcc" />
-		<Unit filename="include/avr/core/impl/TMatx.tcc" />
 		<Unit filename="include/opencv/core/core.hpp" />
 		<Unit filename="include/opencv/core/expressions.hpp" />
 		<Unit filename="include/opencv/core/functions.hpp" />
@@ -162,9 +159,8 @@
 			<Option target="Test_Dbg" />
 			<Option target="Test" />
 		</Unit>
+		<Unit filename="src/Core.cpp" />
 		<Unit filename="src/Handling.cpp" />
-		<Unit filename="src/Quaternion.cpp" />
-		<Unit filename="src/TMatx.cpp" />
 		<Unit filename="src/opencv/alloc.cpp" />
 		<Unit filename="src/opencv/arithm.cpp" />
 		<Unit filename="src/opencv/convert.cpp" />

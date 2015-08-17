@@ -69,9 +69,9 @@ using std::string;
 using std::stringstream;
 
 //! convert code to description string
-static string str (ERROR_COD c);
+static string str (Cod c);
 
-avr::Exception::Exception(ERROR_COD _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line) :
+avr::Exception::Exception(Cod _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line) :
     id(_id), msg(""), err(_err), func(_func), file(_file), line(_line)
     {this->formatMessage();}
 
@@ -96,19 +96,19 @@ void avr::error(const avr::Exception& exc){
     throw exc;
 }
 
-inline string str (ERROR_COD c) {
+inline string str (Cod c) {
     switch(c){
-        case Cod::AssertionFailed:      return "Assertion failed";
-        case Cod::BadAllocation:        return "Bad allocation";
-        case Cod::BadFlag:              return "Invalid flag";
-        case Cod::FunctionArgument:     return "Invalid function's argument";
-        case Cod::TemplateArgument:     return "Invalid template's argument";
-        case Cod::MatrixFormat:         return "Unsupported format of matrix";
-        case Cod::NotImplemented:       return "Not implemented";
-        case Cod::BadCasting:           return "Bad casting";
-        case Cod::NullPointer:          return "Null pointer";
-        case Cod::OutOfRange:           return "Out of range";
-        default: /* Undefined */        return "Undefined";
+        case Cod::AssertionFailed:  return "Assertion failed";
+        case Cod::BadAllocation:    return "Bad allocation";
+        case Cod::BadFlag:          return "Invalid flag";
+        case Cod::FunctionArgument: return "Invalid function's argument";
+        case Cod::TemplateArgument: return "Invalid template's argument";
+        case Cod::MatrixFormat:     return "Unsupported format of matrix";
+        case Cod::NotImplemented:   return "Not implemented";
+        case Cod::BadCasting:       return "Bad casting";
+        case Cod::NullPointer:      return "Null pointer";
+        case Cod::OutOfRange:       return "Out of range";
+        default: /* Undefined */    return "Undefined";
     }
 }
 

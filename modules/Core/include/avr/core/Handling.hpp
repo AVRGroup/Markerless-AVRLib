@@ -82,14 +82,15 @@
     #define AVR_DBG_ASSERT(expr)
 #endif
 
-/** @enum ERROR_COD defines error code flags
- *  independent of language version uses Cod::SomeFlag
+/** @enum Cod defines error code flags
+ *  @note Independent of language version uses Cod::SomeFlag
  */
 #if __cplusplus > 199711L // C++11
-    enum class ERROR_COD : uint8_t {
+    enum class Cod : uint8_t {
 #else
+// struct Cod simulates the enum class avaliable only C++11 or major for C++0x
 struct Cod {
-    enum ERROR_COD {
+    enum ERRORS {
 #endif // __cplusplus
         AssertionFailed = 101,  //!< not passed in assert condition
         FunctionArgument,       //!< any function's argument is invalid
@@ -103,10 +104,11 @@ struct Cod {
         BadFlag,                //!< flag is invalid
         Undefined               //!< other
     };
-#if __cplusplus > 199711L // C++11
-    typedef ERROR_COD Cod;
-#else
-    };
+#if __cplusplus <= 199711L // C++0x
+   ERRORS id;
+   Cod(const ERRORS& _id) : id(_id) { }
+   operator ERRORS() const { return id; }
+};
 #endif // __cplusplus
 
 namespace avr {
@@ -121,7 +123,7 @@ public:
      Full constructor. Normally the constuctor is not called explicitly.
      Instead, the macros AVR_ERROR() and AVR_ASSERT() are used.
     */
-    Exception(ERROR_COD _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line);
+    Exception(Cod _id, const std::string& _err, const std::string& _func, const std::string& _file, int _line);
     virtual ~Exception() throw();
 
     /*!
@@ -130,7 +132,7 @@ public:
     virtual const char *what() const throw();
     void formatMessage();
 
-    ERROR_COD   id;
+    Cod id;
     std::string msg; ///< the formatted error message
     std::string err; ///< error description
     std::string func; ///< function name. Available only when the compiler supports getting it

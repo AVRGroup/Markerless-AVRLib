@@ -168,13 +168,6 @@ Complex<_Tp> operator /= (const Complex<_Tp>& a, _Tp b)
     a.re *= t; a.im *= t; return a;
 }
 
-// begin avr
-template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Complex<_Tp>& b)
-{ return (out << b.re << "+" << b.im << "i"); }
-template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Complex<_Tp>& b)
-{ return (in >> b.re >> b.im); }
-// end avr
-
 //////////////////////////////// Matx /////////////////////////////////
 
 template<typename _Tp, int m, int n> inline Matx<_Tp, m, n>::Matx()
@@ -878,20 +871,6 @@ Vec<_Tp, n> Matx<_Tp, m, n>::solve(const Vec<_Tp, m>& rhs, int method) const
     return reinterpret_cast<Vec<_Tp, n>&>(x);
 }
 
-// begin avr
-template <typename Tp, int r, int c>
-static inline std::ostream& operator << (std::ostream& out, Matx<Tp, r, c> m) {
-   out << "[";
-   for(int i = 0; i < r; i++) {
-      if(i != 0) out << "\n";
-      out << m(i, 0);
-      for(int j = 1; j < c; j++)
-         out << ", " << m(i, j);
-   }
-   return (out << "]");
-}
-// end avr
-
 /*-------------------- Norm function -----------------------*/
 template<typename _Tp, int m, int n> static double norm(const Matx<_Tp, m, n>& M);
 template<typename _Tp, int m, int n> static double norm(const Matx<_Tp, m, n>& M, int normType);
@@ -1388,17 +1367,6 @@ template<typename _Tp, int cn> inline Vec<_Tp, cn> normalize(const Vec<_Tp, cn>&
     return v * (nv ? 1./nv : 0.);
 }
 
-// begin avr
-template<typename _Tp, int cn> static inline std::ostream& operator << (std::ostream& out, const Vec<_Tp, cn>& v)
-{
-    out << "[";
-    for(int i = 0; i < cn; i++)
-        out << v[i] << ", ";
-    out << "\b\b]";
-    return out;
-}
-// end avr
-
 //////////////////////////////// Scalar_ ///////////////////////////////
 
 template<typename _Tp> inline Scalar_<_Tp>::Scalar_()
@@ -1578,13 +1546,6 @@ Scalar_<_Tp>& operator /= (Scalar_<_Tp>& a, const Scalar_<_Tp>& b)
     a = a/b;
     return a;
 }
-
-// begin avr
-template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Scalar_<_Tp>& s)
-{ return (out << "[" << s[0] << ", [" << s[1] << ", " << s[2] << ", " << s[3] << "]]"); }
-template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Scalar_<_Tp>& s)
-{ return (in >> s[0] >> s[1] >> s[2] >> s[3]); }
-// end avr
 
 // end operations.hpp
 

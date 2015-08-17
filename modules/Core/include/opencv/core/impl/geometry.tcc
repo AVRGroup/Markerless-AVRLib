@@ -155,13 +155,6 @@ template<typename _Tp> static inline Point_<_Tp> operator * (const Point_<_Tp>& 
 template<typename _Tp> static inline Point_<_Tp> operator * (double a, const Point_<_Tp>& b)
 { return Point_<_Tp>( saturate_cast<_Tp>(b.x*a), saturate_cast<_Tp>(b.y*a) ); }
 
-// begin avr
-template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Point_<_Tp>& b)
-{ return (out << "(" << b.x << ", " << b.y << ")"); }
-template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Point_<_Tp>& b)
-{ return (in >> b.x >> b.y); }
-// end avr
-
 //////////////////////////////// 3D Point ////////////////////////////////
 
 template<typename _Tp> inline Point3_<_Tp>::Point3_() : x(0), y(0), z(0) {}
@@ -288,13 +281,6 @@ template<typename _Tp> static inline Point3_<_Tp> operator * (double a, const Po
                       saturate_cast<_Tp>(b.y*a),
                       saturate_cast<_Tp>(b.z*a) ); }
 
-// begin avr
-template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Point3_<_Tp>& b)
-{ return (out << "(" << b.x << ", " << b.y << ", " << b.z << ")"); }
-template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Point3_<_Tp>& b)
-{ return (in >> b.x >> b.y >> b.z); }
-// end avr
-
 //////////////////////////////// Rect ////////////////////////////////
 
 template<typename _Tp> inline Rect_<_Tp>::Rect_() : x(0), y(0), width(0), height(0) {}
@@ -387,19 +373,6 @@ template<typename _Tp> static inline Rect_<_Tp> operator | (const Rect_<_Tp>& a,
     return c |= b;
 }
 
-// begin avr
-template<typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Rect_<_Tp>& b)
-{
-    out <<  "Rect_ Information\n" <<
-            "  min  = " << Point_<_Tp>(b.x, b.y) << "\n" <<
-            "  max  = " << Point_<_Tp>(b.x + b.width, b.y + b.height) << "\n" <<
-            "  size = " << b.size() << "\n";
-    return out;
-}
-template<typename _Tp> static inline std::istream& operator >> (std::istream& in, Rect_<_Tp>& b)
-{ return (in >> b.x >> b.y >> b.width >> b.height); }
-// end avr
-
 //////////////////////////////// RotatedRect ////////////////////////////////
 
 inline RotatedRect::RotatedRect() { angle = 0; }
@@ -436,19 +409,6 @@ Rect_<float> inline RotatedRect::boundingRect() const {
    return Rect_<float>(min, max);
 }
 // begin matrix.cpp
-
-// begin avr
-static inline std::ostream& operator << (std::ostream& out, const RotatedRect& b)
-{
-    out <<  "RotatedRect Information\n" <<
-            "  center = " << b.center << "\n" <<
-            "  angle  = " << b.angle << "\n" <<
-            "  size = " << b.size << "\n";
-    return out;
-}
-static inline std::istream& operator >> (std::istream& in, RotatedRect& b)
-{ return (in >> b.center >> b.size >> b.angle); }
-// end avr
 
 } // namespace cv
 

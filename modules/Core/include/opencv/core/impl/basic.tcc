@@ -91,13 +91,6 @@ template<typename _Tp> static inline bool operator == (const Size_<_Tp>& a, cons
 template<typename _Tp> static inline bool operator != (const Size_<_Tp>& a, const Size_<_Tp>& b)
 { return a.width != b.width || a.height != b.height; }
 
-// begin avr
-template <typename _Tp> static inline std::ostream& operator << (std::ostream& out, const Size_<_Tp>& b)
-{ return (out << "[" << b.width << "x" << b.height << "]"); }
-template <typename _Tp> static inline std::istream& operator >> (std::istream& in, Size_<_Tp>& b)
-{ return (in >> b.width >> b.height); }
-// end avr
-
 //////////////////////////////// Range /////////////////////////////////
 
 inline Range::Range() : start(0), end(0) {}
@@ -131,13 +124,6 @@ static inline Range operator + (int delta, const Range& r1)
 { return Range(r1.start + delta, r1.end + delta); }
 static inline Range operator - (const Range& r1, int delta)
 { return r1 + (-delta); }
-
-// begin avr
-static inline std::ostream& operator << (std::ostream& out, const Range& r)
-{ return (out << "[" << r.start << ":" << r.end << "]"); }
-static inline std::istream& operator >> (std::istream& in, Range& r)
-{ return (in >> r.start >> r.end); }
-// end avr
 
 /////////////////////////////// AutoBuffer ////////////////////////////////////////
 
