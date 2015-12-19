@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Exemplo Externo 01" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../../bin/Samples/Externo01Dbg" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../bin/" />
+				<Option object_output="../../bin/Obj/Samples/Ext01/Dbg" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+					<Add option="-DDEBUG_" />
+				</Compiler>
+				<Linker>
+					<Add library="libfreeglut.a" />
+					<Add library="libopengl32.a" />
+					<Add library="libglu32.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../../bin/Samples/Externo01" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../bin/" />
+				<Option object_output="../../bin/Obj/Samples/Ext01" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-std=c++11" />
+				</Compiler>
+				<Linker>
+					<Add library="libglut32.a" />
+					<Add library="libopengl32.a" />
+					<Add library="libglu32.a" />
+					<Add library="libjpeg.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
+			<Add directory="../../include" />
+		</Compiler>
+		<Linker>
+			<Add library="libopencv_calib3d2410.dll.a" />
+			<Add library="libopencv_core2410.dll.a" />
+			<Add library="libopencv_features2d2410.dll.a" />
+			<Add library="libopencv_highgui2410.dll.a" />
+			<Add library="libopencv_nonfree2410.dll.a" />
+			<Add library="libopencv_video2410.dll.a" />
+			<Add library="libopencv_imgproc2410.dll.a" />
+			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
+			<Add directory="../../lib" />
+		</Linker>
+		<Unit filename="Constants.hpp" />
+		<Unit filename="Interface.cpp" />
+		<Unit filename="Interface.hpp" />
+		<Unit filename="main.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
