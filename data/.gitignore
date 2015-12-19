@@ -9,14 +9,14 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Media files
-*.jpg
-*.JPG
+# *.jpg
+# *.JPG
 *.png
 *.PNG
 *.bmp
 *.BMP
-*.mp4
-*.MP4
+# *.mp4
+# *.MP4
 *.wmv
 *.WMV
 *.avi
