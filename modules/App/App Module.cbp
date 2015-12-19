@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="App Module" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="AppTest">
+				<Option output="../../bin/AVRAppTest" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../bin/" />
+				<Option object_output="../../bin/Obj/App/Test" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
+			<Add directory="../Core/include" />
+			<Add directory="../App/include" />
+			<Add directory="../View/include" />
+			<Add directory="../Track/include" />
+			<Add directory="../Camera/include" />
+		</Compiler>
+		<Linker>
+			<Add library="libAVRCoreDbg.a" />
+			<Add library="libAVRViewDbg.a" />
+			<Add library="libAVRTrackDbg.a" />
+			<Add library="libAVRCameraDbg.a" />
+			<Add library="libopencv_core2410.dll.a" />
+			<Add library="libopencv_highgui2410.dll.a" />
+			<Add library="libopencv_calib3d2410.dll.a" />
+			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
+			<Add directory="../../lib/avrlib" />
+		</Linker>
+		<Unit filename="include/avr/Application.hpp" />
+		<Unit filename="main.cpp" />
+		<Unit filename="src/Application.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

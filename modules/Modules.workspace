@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="AVR Modules">
+		<Project filename="App/App Module.cbp" />
+		<Project filename="Camera/Camera Module.cbp" />
+		<Project filename="Core/Core Module.cbp" />
+		<Project filename="Track/Track Module.cbp" />
+		<Project filename="View/View Module.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
