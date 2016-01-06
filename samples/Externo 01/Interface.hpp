@@ -2,6 +2,7 @@
 #define GL_INTERFACE_HPP
 
 #include <GL/freeglut.h>
+#include <GL/glext.h>
 #include "Constants.hpp"
 
 class Interface{

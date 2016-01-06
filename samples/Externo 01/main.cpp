@@ -202,7 +202,6 @@ public:
       cv::line(show, currVertex[2], currVertex[3], Scalar(0, 255, 0), 3);
       cv::line(show, currVertex[3], currVertex[0], Scalar(0, 255, 0), 3);
       //
-
       /// CAMERA //////////////////////////////////////////////////////////
 //      vector<Point3f> objectPoints (this->objVertex.begin(), this->objVertex.end());
       vector<Point2f>& imagePoints = currVertex;
@@ -227,7 +226,6 @@ public:
       }
 #endif // DEBUG_
       this->Render(show, pose);
-
       curr.assignTo(prev);
       prevCorners.assign(currCorners.begin(), currCorners.end());
    } // Draw
@@ -237,7 +235,7 @@ public:
 
       glDepthFunc(GL_LEQUAL);
       glEnable(GL_DEPTH_TEST);
-      glEnable(GL_NORMALIZE);
+      //glEnable(GL_RESCALE_NORMAL); //GL_NORMALIZE
 
       Mat flipped;
       cv::flip(image, flipped, 0);
@@ -291,7 +289,7 @@ public:
          glVertex3d(0.0, 0.0, 100.0);
       glEnd();
 
-      glDisable(GL_NORMALIZE);
+      //glDisable(GL_RESCALE_NORMAL); // GL_NORMALIZE
       glDisable(GL_DEPTH_TEST);
 
       glutSwapBuffers();
@@ -316,7 +314,7 @@ public:
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
       // Generates the image on the memory
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR_EXT, GL_UNSIGNED_BYTE, image);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, image);
 
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
