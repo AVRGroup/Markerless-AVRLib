@@ -14,12 +14,8 @@ public:
    static SPtr<Application> New(size_t videoDevice = 0);
    static SPtr<Application> New(const std::string& videoFile);
 
-   void SetWindow(const Window::Builder& win)
-   { this->win = WindowManager::Create(win); }
-
-   void SetCameraFile(const std::string& file)
-   { this->cam = new Camera(file); }
-
+   void SetWindow(const Window::Builder& win);
+   void SetCameraFile(const std::string& file);
    void RegistryMarker(const SPtr<Marker>&);
 
    void Start();
@@ -32,9 +28,10 @@ private:
    class Capturer;
    Application(Capturer&);
 
-   Capturer&    cap;
-   SPtr<Window> win;
-   SPtr<Camera> cam;
+   Capturer&      cap;
+   SPtr<Window>   win;
+   SPtr<Camera>   cam;
+   SPtr<Renderer> rdr;
 
    Set<Marker> markers;
 

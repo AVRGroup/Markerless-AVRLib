@@ -14,9 +14,7 @@ public:
    Capturer(const std::string& file) : cv::VideoCapture(file) { }
 };
 
-Application::Application(Capturer& cap) : cap(cap) {
-
-}
+Application::Application(Capturer& cap) : cap(cap) { /* ctor */ }
 
 void Application::Start() {
 
@@ -32,6 +30,10 @@ void Application::Pause() {
 
 void Application::Restart() {
 
+}
+
+void Application::RegistryMarker(const SPtr<Marker>& mk) {
+   this->markers.push_back(mk);
 }
 
 SPtr<Application> Application::New(size_t device) {

@@ -7,15 +7,25 @@ using std::vector;
 static const uint64_t MASK = 0xF;
 
 ////////////////////////////////////////////////// Window ///////////////////////////////////////////////////////
-void Window::AddInKey(size_t index, size_t pos) {
-   // Armazena o índice onde será inserido o Listener na chave
-   // O índice é incrementado em 1 para uso do 0 como flag
-   index += 1;
-   key = key | (index << (pos << 2));
+void Window::SetRenderer(const SPtr<Renderer>& renderer) {
+   this->renderer = renderer;
+   this->renderer->Initialize();
+   this->RegistryRenderer();
 }
 
 SPtr<Renderer> Window::GetRenderer() const {
    return this->renderer;
+}
+
+void Window::AddListener(const SPtr<EventListener>& listener) {
+   // Armazena o índice onde será inserido o Listener na chave
+   // O índice é incrementado em 1 para uso do 0 como flag
+   size_t code  = listener->GetCode();
+   size_t index = this->listeners.size() + 1;
+   this->key = this->key | (index << (code << 2));
+
+   this->listeners.push_back(listener);
+   this->RegistryListener(code);
 }
 
 SPtr<EventListener> Window::GetListener(size_t code) const {
@@ -60,6 +70,13 @@ void WindowManager::Destroy(size_t id) {
    if(not win.Null()) {
       win->Destroy();
       windows[id-1] = nullptr; count--;
+   }
+}
+
+void WindowManager::Iterates(const std::function<void(const Window&)>& func) {
+   for(const auto& win : windows) {
+      if(not win.Null())
+         func(*win);
    }
 }
 

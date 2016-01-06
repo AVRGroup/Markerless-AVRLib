@@ -24,9 +24,9 @@ using cv::Rect_;
 using cv::Size_;
 
 //! Rename some opencv normal classes
-typedef cv::Mat             Mat;
-typedef cv::Range           Range;
-typedef cv::RotatedRect     RotatedRect;
+typedef cv::Mat         Mat;
+typedef cv::Range       Range;
+typedef cv::RotatedRect RotatedRect;
 
 //! @typedef More shorter aliases for C++ interger primitive types
 typedef int8_t          byte;
@@ -52,6 +52,9 @@ typedef Size_<int>      Size2i;     typedef Size_<float>        Size2f;     type
 typedef const cv::_InputArray&  InputArray;
 typedef const cv::_OutputArray& OutputArray;
 typedef const cv::_OutputArray& InputOutputArray;
+// Collection of abstract class references
+template <class T>
+using Set = std::vector<SPtr<T> >;
 
 //! Import some opencv functions
 using cv::noArray;

@@ -1,18 +1,18 @@
 #ifndef AVR_WINDOW_HPP
 #define AVR_WINDOW_HPP
 
-#include <avr/core/Core.hpp>
+#include <functional>
 
-#include "EventListener.hpp"
-#include "Renderer.hpp"
+#include <avr/core/Core.hpp>
+#include <avr/view/Listener.hpp>
+#include <avr/view/Renderer.hpp>
 
 namespace avr {
 
+//! classes in this file !//
 class Window;
 class WindowManager;
-
-template <class T>
-using Set = std::vector<SPtr<T> >;
+//!/////////////////////!//
 
 class Window {
 public:
@@ -33,8 +33,8 @@ public:
    virtual void SetSize(const Size2i&) = 0;
    virtual void SetPosition(const Point2i&) = 0;
 
-   virtual void AddListener(const SPtr<EventListener>& listener) = 0;
-   virtual void SetRenderer(const SPtr<Renderer>& renderer) = 0;
+   void AddListener(const SPtr<EventListener>& listener);
+   void SetRenderer(const SPtr<Renderer>& renderer);
 
    SPtr<Renderer> GetRenderer() const;
    SPtr<EventListener> GetListener(size_t code) const;
@@ -47,7 +47,8 @@ protected:
    Window(size_t id) : renderer(0x0), id(id), key(0x0) {/* ctor */}
 
    virtual void Destroy() = 0;
-   void AddInKey(size_t idx, size_t pos);
+   virtual void RegistryListener(size_t code) = 0;
+   virtual void RegistryRenderer() = 0;
 
    SPtr<Renderer> renderer;
    Set<EventListener> listeners;
@@ -61,14 +62,34 @@ private:
 
 class WindowManager {
 public:
-   typedef std::vector<SPtr<Window> >::iterator Iterator;
-
    static SPtr<Window> Create(const Window::Builder&);
    static void Destroy(SPtr<Window>&);
    static void Destroy(size_t id);
 
-   static size_t NumberOfWindows()        { return count; }
+   static size_t NumberOfWindows()     { return count; }
    static SPtr<Window> Get(size_t id)  { return windows[id-1]; }
+
+   /**
+    * @brief Iterates the set of windows, call the function passed by parameter for each active window in the set
+    * @param func Handle function that receives the current window of the iteration. Possible parameters are: \
+    *    \li Pointer to a function \
+    *    \code {.cpp}
+    *       void myFunc(const Window& w) {\/\* ... \*\/}
+    *       // ...
+    *       WindowManager::Iterates(myFunc);
+    *    \endcode
+    *    \li Functor (function object) \
+    *    \code {.cpp}
+    *       class Functor { void operator()(const Window& w) {\/\* ... \*\/} };
+    *       // ...
+    *       WindowManager::Iterates(Functor());
+    *    \endcode
+    *    \li Lambda expression \
+    *    \code
+    *       WindowManager::Iterates([] (const Window& w) {\/\* ... \*\/});
+    *    \endcode
+    */
+   static void Iterates(const std::function<void(const Window&)>& func);
 
    WindowManager() = delete;
    WindowManager(const WindowManager&) = delete;
