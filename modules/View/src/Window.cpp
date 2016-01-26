@@ -58,19 +58,25 @@ SPtr<Window> WindowManager::Create(const Window::Builder& win) {
    return obj;
 }
 
-void WindowManager::Destroy(SPtr<Window>& win) {
+bool WindowManager::Destroy(SPtr<Window>& win) {
+   bool ok = false;
    if(not win.Null()) {
-      win->Destroy();
       windows[win->GetID()-1] = nullptr; count--;
+      ok = win->Destroy();
+      win = nullptr;
    }
+   return ok;
 }
 
-void WindowManager::Destroy(size_t id) {
+bool WindowManager::Destroy(size_t id) {
+   bool ok = false;
    SPtr<Window> win = windows[id-1];
    if(not win.Null()) {
-      win->Destroy();
       windows[id-1] = nullptr; count--;
+      ok = win->Destroy();
+      win = nullptr;
    }
+   return ok;
 }
 
 void WindowManager::Iterates(const std::function<void(const Window&)>& func) {

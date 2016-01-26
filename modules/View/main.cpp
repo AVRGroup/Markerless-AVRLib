@@ -20,9 +20,6 @@ public:
          switch(evt.key) {
          case 27:
             WindowManager::Destroy(evt.SOURCE_ID);
-            if(WindowManager::NumberOfWindows() == 0) {
-               GLUT::LeaveMainLoop();
-            }
             break;
          }
       }

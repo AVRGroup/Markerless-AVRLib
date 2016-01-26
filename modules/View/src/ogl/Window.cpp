@@ -56,9 +56,13 @@ GLUT::Window::Window(const string& label) : Super(glutCreateWindow(label.c_str()
    glutDisplayFunc(GLUT::DefaultDisplayCallback);
 }
 
-void GLUT::Window::Destroy() {
-   size_t id = Super::GetID();
-   glutDestroyWindow(id);
+bool GLUT::Window::Destroy() {
+   if(glutGetWindow()) {
+      size_t id = Super::GetID();
+      glutDestroyWindow(id);
+      return true;
+   }
+   return false;
 }
 
 void GLUT::Window::RegistryListener(size_t code) {

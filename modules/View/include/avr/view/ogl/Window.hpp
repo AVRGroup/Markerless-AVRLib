@@ -56,7 +56,7 @@ private:
 
    void RegistryListener(size_t code);
    void RegistryRenderer();
-   void Destroy();
+   bool Destroy();
 
 private:
    std::string label;

@@ -46,7 +46,7 @@ public:
 protected:
    Window(size_t id) : renderer(0x0), id(id), key(0x0) {/* ctor */}
 
-   virtual void Destroy() = 0;
+   virtual bool Destroy() = 0;
    virtual void RegistryListener(size_t code) = 0;
    virtual void RegistryRenderer() = 0;
 
@@ -62,11 +62,15 @@ private:
 
 class WindowManager {
 public:
+   //! @brief Builds a new window and return it
    static SPtr<Window> Create(const Window::Builder&);
-   static void Destroy(SPtr<Window>&);
-   static void Destroy(size_t id);
-
+   //! @return true if window has been successfully destroyed, false otherwise (window was already destroyed before or it does not exist)
+   static bool Destroy(SPtr<Window>&);
+   //! @return true if window has been successfully destroyed, false otherwise (window was already destroyed before or it does not exist)
+   static bool Destroy(size_t id);
+   //! @return number of active windows
    static size_t NumberOfWindows()     { return count; }
+   //! @return window whose identifier equals to id
    static SPtr<Window> Get(size_t id)  { return windows[id-1]; }
 
    /**

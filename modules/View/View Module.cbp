@@ -56,16 +56,19 @@
 			<Add directory="../../lib" />
 			<Add directory="../../lib/avrlib" />
 		</Linker>
-		<Unit filename="include/avr/view/EventListener.hpp" />
-		<Unit filename="include/avr/view/GLUT.hpp" />
+		<Unit filename="include/avr/view/Event.hpp" />
+		<Unit filename="include/avr/view/Listener.hpp" />
 		<Unit filename="include/avr/view/Renderer.hpp" />
 		<Unit filename="include/avr/view/Window.hpp" />
+		<Unit filename="include/avr/view/ogl/Events.hpp" />
+		<Unit filename="include/avr/view/ogl/Listeners.hpp" />
+		<Unit filename="include/avr/view/ogl/Window.hpp" />
 		<Unit filename="main.cpp">
 			<Option target="ViewTest" />
 		</Unit>
-		<Unit filename="src/EventListener.cpp" />
-		<Unit filename="src/GLUT.cpp" />
 		<Unit filename="src/Window.cpp" />
+		<Unit filename="src/ogl/Listeners.cpp" />
+		<Unit filename="src/ogl/Window.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
