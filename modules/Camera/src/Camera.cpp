@@ -24,65 +24,64 @@ Camera::Camera(const std::string& filename) : intrinsecs(), resolution(Size2d(0.
    distCoeffs.copyTo(this->distortion);
 }
 
-Camera::~Camera(){
-   // dtor
-}
-
-void Camera::Pose(const std::vector<Point2f>& world, const std::vector<Point2f>& location, TMatx& pose){
-   std::vector<Point3f> _world(world.begin(), world.end());
-   this->Pose(_world, location, pose);
-}
-
-void Camera::Pose(const std::vector<Point3f>& world, const std::vector<Point2f>& location, TMatx& pose){
+TMatx Camera::Pose(const std::vector<Point3d>& world, const std::vector<Point2d>& location, bool lost) const {
    static bool first = true;
 
    cv::Vec3d   rotVec;
    cv::Vec3d   translat;
-   // temp
-   bool lost_mode = true;
 
-   if(lost_mode){
-      cv::solvePnPRansac(world, location, this->intrinsecs, this->distortion, rotVec, translat, !first, IT_MAX, 8.0, 100, cv::noArray(), CV_EPNP);
+   if(lost){
+      cv::solvePnPRansac(world, location, this->intrinsecs, this->distortion, rotVec, translat, !first, IT_MAX, 8.0, 4, cv::noArray(), CV_EPNP);
+      first = false;
    } else { // tracking
       cv::solvePnP(world, location, this->intrinsecs, this->distortion, rotVec, translat, false, CV_ITERATIVE);
    }
-   first = false;
 
    cv::Matx33d rotation;
    cv::Rodrigues(rotVec, rotation);
-   pose = TMatx(rotation, translat);
-
-   //   std::vector<double> rotation;
-   //   std::vector<double> translat;
-   //
-   //   _rotation.copyTo(rotation);
-   //   _translat.copyTo(translat);
-   //
-   //   pose = TMatx(rotation, translat);
-
+   return TMatx(rotation, translat);
 }
 
-TMatx Camera::GetProjection(){
-   const double near = 0.05;
-   const double far  = 1000;
-   bool invert = false;
+TMatx Camera::Pose(const std::vector<Point2d>& world, const std::vector<Point2d>& location, bool lost) const {
+   std::vector<Point3d> _world(world.begin(), world.end());
+   return this->Pose(_world, location, lost);
+}
+
+TMatx Camera::Projection(double near, double far) const {
+   const double& width = resolution.width;
+   const double& height = resolution.height;
+
+   const double& fx = intrinsecs(0, 0);
+   const double& fy = intrinsecs(1, 1);
+   const double& cx = intrinsecs(0, 2);
+   const double& cy = intrinsecs(1, 2);
 
    TMatx projection;
-   projection(0, 0) = 2.0 * this->intrinsecs(0, 0) / this->resolution.width;
-   projection(0, 2) = -((2.0 * this->intrinsecs(0, 2) / this->resolution.width) - 1);
-   projection(1, 1) = -(2.0 * this->intrinsecs(1, 1) / this->resolution.height);
-   projection(1, 2) = (2.0 * this->intrinsecs(1, 2) / this->resolution.height) - 1;
-   projection(2, 2) = -(far + near)/(far - near);
-   projection(2, 3) = -2.0 * (far * near)/(far - near);
+   projection(0, 0) = 2.0 * fx / width;
+   projection(0, 2) = 1.0 - (2.0 * cx / width);
+   projection(1, 1) = 2.0 * fy / height;
+   projection(1, 2) = 1.0 - (2.0 * cy / height);
+   projection(2, 2) = (near - far) / (far - near);
+   projection(2, 3) = (-2.0 * far * near) / (far - near);
    projection(3, 2) = -1.0;
-//   projection(3, 3) = 0.0; // ??
-
-   if (invert) {
-      projection(1, 1) = - projection(1, 1);
-      projection(1, 2) = - projection(1, 2);
-//      projection(1, 3) = - projection(1, 3); // = 0
-//      projection(1, 0) = - projection(1, 0); // = 0
-   }
+   projection(3, 3) = 0.0;
 
    return projection;
+}
+
+void Camera::Convert(const std::vector<Point2d>& imageCoord, std::vector<Point3d>& worldCoord) const {
+   Point2d c = Point2d(resolution.width/2.0, resolution.height/2.0);
+   Point2d f = Point2d(intrinsecs(0, 0), intrinsecs(1, 1));
+
+   worldCoord.clear();
+   for(auto pi : imageCoord)
+      worldCoord.push_back(Point3d( (pi.x - c.x) / f.x, (pi.y - c.y) / f.y, 1.0 ));
+}
+void Camera::Convert(const std::vector<Point3d>& worldCoord, std::vector<Point2d>& imageCoord) const {
+   Point2d c = Point2d(resolution.width/2.0, resolution.height/2.0);
+   Point2d f = Point2d(intrinsecs(0, 0), intrinsecs(1, 1));
+
+   imageCoord.clear();
+   for(auto pw : worldCoord)
+      imageCoord.push_back(Point2d( f.x * pw.x + c.x, f.y * pw.y + c.y ));
 }

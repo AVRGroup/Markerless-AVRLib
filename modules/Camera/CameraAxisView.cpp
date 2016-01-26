@@ -84,8 +84,8 @@ class CameraAxisView : Interface{
       void Init(int argc, char* argv[]){
          sphere(0.0, 90.0, 1100.0);
 
-         colorImage = imread(DATA_PATH "cormem_livro.jpg", cv::IMREAD_COLOR);
-         grayImage = imread(DATA_PATH "cormem_livro.jpg", cv::IMREAD_GRAYSCALE);
+         colorImage = imread(DATA_PATH "cormem_object.jpg", cv::IMREAD_COLOR);
+         grayImage = imread(DATA_PATH "cormem_object.jpg", cv::IMREAD_GRAYSCALE);
 
          if(!colorImage.data or !grayImage.data ){
             cerr << "Falha ao carregar imagem" << endl;
@@ -182,7 +182,7 @@ class CameraAxisView : Interface{
 
       void DrawInFrame(cv::Mat& frame){
          cv::Mat glPixels = cv::Mat(frame.size(), frame.type());
-         glReadPixels(0, 0, frame.cols, frame.rows, GL_BGR_EXT , GL_UNSIGNED_BYTE, glPixels.ptr<uchar>(0));
+         glReadPixels(0, 0, frame.cols, frame.rows, GL_BGR , GL_UNSIGNED_BYTE, glPixels.ptr<uchar>(0));
 
          cv::Mat flipy = cv::Mat::zeros(glPixels.size(), glPixels.type());
          for(int b = glPixels.rows-1, c = 0; b >= 0; b--, c++){
@@ -241,9 +241,8 @@ class CameraAxisView : Interface{
          }
 
          /// Teste da Camera AQUI
-         TMatx pose;
          Camera cam(DATA_PATH "camera.yml");
-         cam.Pose(imageCorner, frameCorner, pose);
+         TMatx pose = cam.Pose(imageCorner, frameCorner, true);
          /// Fim teste da Camera
 
          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
