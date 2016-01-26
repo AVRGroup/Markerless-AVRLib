@@ -367,10 +367,12 @@ public:
    Quaternion& operator -= (const Quaternion&);
    Quaternion& operator *= (const Quaternion&);
    Quaternion& operator *= (const double& scalar);
+   Quaternion& operator /= (const double& scalar);
    Quaternion  operator +  (const Quaternion&) const;
    Quaternion  operator -  (const Quaternion&) const;
    Quaternion  operator *  (const Quaternion&) const;
    Quaternion  operator *  (const double& scalar) const;
+   Quaternion  operator /  (const double& scalar) const;
 
 private:
    cv::Vec<double, 4> data;

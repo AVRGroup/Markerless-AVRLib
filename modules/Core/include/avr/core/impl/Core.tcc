@@ -134,13 +134,13 @@ template <typename Tp> TMatx::TMatx(const Matx<Tp, 3, 4>& transf) : data() {
 }
 template <typename Tp> TMatx::TMatx(const Matx<Tp, 4, 4>& transf) : data() {
    for(int i = 0; i < 16; i++)
-      this->data(i) = double(transf(i));
+      this->data.val[i] = double(transf.val[i]);
 }
 #if __cplusplus > 199711L // C++11
 template <typename Tp> TMatx::TMatx(std::initializer_list<Tp> _list) : data(Matx44d::eye()) {
    auto it = _list.begin();
    for(size_t i = 0; i < std::min(_list.size(), size_t(16)); i++, it++)
-      this->data(i) = double(*it);
+      this->data.val[i] = double(*it);
 }
 #endif // __cplusplus
 // Access a particular matrix cell
@@ -222,7 +222,7 @@ inline Vec3d Quaternion::GetAxis() const {
 // Static methods
 inline double Quaternion::Norm() const       { return std::sqrt(double(Qw() * Qw() + Qx() * Qx() + Qy() * Qy() + Qz() * Qz())); }
 inline Quaternion Quaternion::Conj() const   { return Quaternion(Qw(), -Qx(), -Qy(), -Qz()); }
-inline Quaternion Quaternion::Inv() const    { return Conj() * (1.0/Norm()); }
+inline Quaternion Quaternion::Inv() const    { double norm = Norm(); return Conj() / (norm * norm); }
 // Element-access operators
 inline double& Quaternion::operator [] (ubyte i)               { return this->data[i]; }
 inline const double& Quaternion::operator [] (ubyte i) const   { return this->data[i]; }
@@ -231,11 +231,13 @@ inline Quaternion& Quaternion::operator += (const Quaternion& q)  { this->data +
 inline Quaternion& Quaternion::operator -= (const Quaternion& q)  { this->data -= q.data; return * this; }
 inline Quaternion& Quaternion::operator *= (const Quaternion& q)  { this->data *= q.data; return * this; }
 inline Quaternion& Quaternion::operator *= (const double& scalar) { this->data = this->data * double(scalar); return * this; }
+inline Quaternion& Quaternion::operator /= (const double& scalar) { this->data = this->data / double(scalar); return * this; }
 // Arithmetic operator overloads
 inline Quaternion Quaternion::operator + (const Quaternion& q) const    { return Quaternion(this->data + q.data); }
 inline Quaternion Quaternion::operator - (const Quaternion& q) const    { return Quaternion(this->data - q.data); }
 inline Quaternion Quaternion::operator * (const Quaternion& q) const    { return Quaternion(this->data * q.data); }
 inline Quaternion Quaternion::operator * (const double& scalar) const   { return Quaternion(this->data * double(scalar)); }
+inline Quaternion Quaternion::operator / (const double& scalar) const   { return Quaternion(this->data / double(scalar)); }
 // Private methods
 inline Quaternion::Quaternion(double qw, double qx, double qy, double qz) : data(Vec<double, 4>(qw, qx, qy, qz)) { }
 inline void Quaternion::create(Cdouble theta, Cdouble x, Cdouble y, Cdouble z) {

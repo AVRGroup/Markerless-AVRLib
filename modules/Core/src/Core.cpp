@@ -21,14 +21,20 @@ TMatx::TMatx(const double (&buf)[16], bool byRow) : data() {
 }
 
 Quaternion TMatx::GetQuaternion() const {
+   Matx44d matx = this->data;
+
+   float det = float(cv::determinant(matx));
+   if(det != 1.0f) matx *= (1.0/double(det));
+
    Quaternion q;
-   q[0] = this->At(0, 0) + this->At(1, 1) + this->At(2, 2) + 1.0;
+   // 0: qw; 1: qx; 2: qy; 3: qz
+   q[0] = matx(0, 0) + matx(1, 1) + matx(2, 2) + 1.0;
    if(Double(q[0]) < 0.0) return Quaternion();
 
    q[0] = std::sqrt(q[0]);
-   q[1] = (this->At(2, 1) - this->At(1, 2)) / (2.0 * q[0]);
-   q[2] = (this->At(0, 2) - this->At(2, 0)) / (2.0 * q[0]);
-   q[3] = (this->At(1, 0) - this->At(0, 1)) / (2.0 * q[0]);
+   q[1] = (matx(2, 1) - matx(1, 2)) / (2.0 * q[0]);
+   q[2] = (matx(0, 2) - matx(2, 0)) / (2.0 * q[0]);
+   q[3] = (matx(1, 0) - matx(0, 1)) / (2.0 * q[0]);
    q[0] = q[0] / 2.0;
 
    return q;
@@ -48,20 +54,20 @@ void TMatx::GetData(double buf[16], bool byRow) const {
 
 ///////////////////////////////////////// Quaternion ////////////////////////////////////////
 TMatx Quaternion::GetMatrix() const {
-   double _2x = 2.0 * Qx();
-   double _2y = 2.0 * Qy();
-   double _2z = 2.0 * Qz();
-   double _2w = 2.0 * Qw();
+   Vec4d q = this->data;
 
-   double _2xx = _2x * Qx();
-   double _2xy = _2x * Qy();
-   double _2xz = _2x * Qz();
-   double _2yy = _2y * Qy();
-   double _2yz = _2y * Qz();
-   double _2zz = _2z * Qz();
-   double _2wx = _2w * Qx();
-   double _2wy = _2w * Qy();
-   double _2wz = _2w * Qz();
+   float norm = cv::norm(q);
+   if(norm != 1.0f) q = cv::normalize(q);
+   // 0: qw; 1: qx; 2: qy; 3: qz
+   double _2xx = 2.0 * q[1] * q[1];
+   double _2xy = 2.0 * q[1] * q[2];
+   double _2xz = 2.0 * q[1] * q[3];
+   double _2yy = 2.0 * q[2] * q[2];
+   double _2yz = 2.0 * q[2] * q[3];
+   double _2zz = 2.0 * q[3] * q[3];
+   double _2wx = 2.0 * q[0] * q[1];
+   double _2wy = 2.0 * q[0] * q[2];
+   double _2wz = 2.0 * q[0] * q[3];
 
    TMatx matx;
    matx(0, 0) = 1.0 - (_2yy + _2zz);
