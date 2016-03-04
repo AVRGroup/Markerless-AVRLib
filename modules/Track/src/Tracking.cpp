@@ -1,49 +1,96 @@
-#include <opencv2/video/tracking.hpp>   // optflow
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
 
 #include <avr/track/Tracking.hpp>
 
+#define WINDOWS_BORDER_SIZE   50
+
 namespace avr {
 
-LukasKanadeAlgorithm::LukasKanadeAlgorithm() : OpticFlowAlgorithm() {/* ctor */}
-
-void LukasKanadeAlgorithm::operator() (const Mat& prevFrame, const vector<Point2f>& prevTracked,
-                                       const Mat& currFrame, vector<Point2f>& tracked,
-                                       vector<Point2f>& object)
-{
-   /**
-    * calcOpticalFlowPyrLK(prevImg, nextImg, prevPts, nextPts, status, err, winSize=Size(21,21), maxLevel=3,
-    *                      criteria=TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, 30, 0.01), flags=0, minEigThreshold=1e-4)
-    *    - prevImg   Frame anterior
-    *    - nextImg   Frame corrente
-    *    - prevPts   Features na prevImg
-    *    - nextPts   Features na nextImg [Output]
-    *    - status    Status de cada ponto em nextPts (se 1 foi rastreado, 0 c.c) [Output]
-    *    - err       Erro de cada ponto em nextPts [Output]
-    *    - winSize   Tamanho da janela de busca
-    *    - maxLevel  Nível máximo da pirâmide (espaço escala)
-    *    - criteria  TermCriteria(type, maxCount, epsilon), Critério de parada do loop (it <= maxCount, search window moves by less than epsilon)
-    *    - flags     OPTFLOW_USE_INITIAL_FLOW usa conteúdo de nextPts como estimações iniciais, se não setada usa prevPts
-    *                OPTFLOW_LK_GET_MIN_EIGENVALS usa os menores autovalores como medida de erro, se não setada usa L1 divido por pixels na janela
-    *    - minEigThreshold limiar mínimo para os autovalores
-    */
-
-   vector<unsigned char> status; vector<float> err;
-   cv::calcOpticalFlowPyrLK(prevFrame, currFrame, prevTracked, tracked, status, err,
-                            cv::Size(31,31), 3, cv::TermCriteria(3, 20, 0.03), 0, 1e-3);
-   // TODO Filtrar os pontos que foram rastreados pelo status
-   size_t k = 0;
-   for(size_t i = 0; i < status.size(); i++) {
-      if(status[i]) {
-         tracked[k] = tracked[i];
-         object[k++] = object[i];
-      }
+SPtr<Marker> TrackingSystem::Unpack(const PreMarker& mk) const {
+   Mat image = cv::imread(mk.path, cv::IMREAD_GRAYSCALE);
+   if(image.empty()) {
+      AVR_ERROR(Cod::Undefined, "It did not read the image file to build the marker");
    }
-   tracked.resize(k);
-   object.resize(k);
+   vector<cv::KeyPoint> keys; Mat descs;
+   methods.Detect(image, keys);
+   methods.Extract(image, keys, descs);
+
+   vector<Point2f> points;
+   cv::KeyPoint::convert(keys, points);
+
+   return new Marker(image.size(), points, descs, mk.model);
+}
+
+/**-----------------------------------------------------------------------------------------------------------------------------------------------**\
+*                                                        FeatureTracker                                                                             *
+\**-----------------------------------------------------------------------------------------------------------------------------------------------**/
+
+TrackResult FeatureTracker::Track(const Marker& target, const Mat& scene, float trackedThreshold) {
+   cv::Mat sceneDescriptors;
+   vector<cv::KeyPoint> sceneKeypoints;
+   vector<cv::DMatch> matches;
+
+   methods.Detect(scene, sceneKeypoints);
+   methods.Extract(scene, sceneKeypoints, sceneDescriptors);
+   methods.Match(this->UnpackDescs(target), sceneDescriptors, matches);
+
+   const Coords2D& targetKeypoints = this->UnpackKeys(target);
+
+   TrackResult result;
+   for(auto it : matches) {
+      result.targetPoints.push_back(targetKeypoints[it.queryIdx]);
+      result.scenePoints.push_back(sceneKeypoints[it.trainIdx].pt);
+   }
+
+   //double rate = matches.size() / (double) targetKeypoints.size();
 
 #ifdef DEBUG_
-   cout << "rest: " << tracked.size() << endl;
+   for(auto p : result.scenePoints) {
+      cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
+   }
 #endif // DEBUG_
+
+   return result;
+}
+
+/**-----------------------------------------------------------------------------------------------------------------------------------------------**\
+*                                                         MotionTracker                                                                             *
+\**-----------------------------------------------------------------------------------------------------------------------------------------------**/
+
+TrackResult MotionTracker::Track(const Marker& target, const Mat& scene, float trackedThreshold) {
+   auto& scenePoints = this->prevResults.scenePoints;
+   auto& targetPoints = this->prevResults.targetPoints;
+
+   vector<Point2f> currPoints; vector<float> error;
+   this->methods.Track(this->prevScene, scenePoints, scene, currPoints, error);
+
+   // Filtra os pontos que foram rastreados pelo status
+   size_t k = 0;
+   for(size_t i = 0; i < error.size(); i++) {
+      if(0.0f <= error[i]) {
+         currPoints[k] = currPoints[i];
+         targetPoints[k++] = targetPoints[i];
+      }
+   }
+   currPoints.resize(k);
+   targetPoints.resize(k);
+
+   //const Coords2D& targetKeypoints = this->UnpackDescs(target);
+   //double rate = targetPoints.size() / (double) targetKeypoints.size();
+
+#ifdef DEBUG_
+   for(auto p : scenePoints) {
+      cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
+   }
+#endif // DEBUG_
+
+   scene.copyTo(this->prevScene);
+   scenePoints.clear();
+   scenePoints.assign(currPoints.begin(), currPoints.end());
+
+   return this->prevResults;
 }
 
 } // namespace avr

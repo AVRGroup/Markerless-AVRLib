@@ -1,8 +1,9 @@
 #include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/features2d/features2d.hpp> // ORB, BRISK, etc..
 #include <opencv2/nonfree/features2d.hpp>    // SIFT and SURF
+#include <opencv2/video/tracking.hpp>        // optflow
 
-#include <avr/track/Features.hpp>
+#include <avr/track/Algorithms.hpp>
 
 #ifndef NULL
    #define NULL 0x0
@@ -97,6 +98,51 @@ void FlannBasedMatcher::operator() (const Mat& query, const Mat& train, vector<c
    for(auto it : matches)
       if(it[0].distance < 0.7 * it[1].distance)
          goodMatches.push_back(it[0]);
+}
+
+/*----------------------------------------------------------------------------------------------------------------------------*\
+*                                                     Optical Flow                                                             *
+\*----------------------------------------------------------------------------------------------------------------------------*/
+
+void LucasKanadeAlgorithm::operator() (const Mat& prevImage, const vector<Point2f>& prevTracked,
+                                       const Mat& currImage, vector<Point2f>& tracked,
+                                       vector<float>& error) const
+{
+   vector<unsigned char> status; vector<float> err;
+   cv::calcOpticalFlowPyrLK(prevImage, currImage, prevTracked, tracked, status, err,
+                            cv::Size(31,31), 3, cv::TermCriteria(3, 20, 0.03), 0, 1e-3);
+
+   for(size_t i = 0; i < status.size(); i++) {
+      error.push_back( status[i] ? err[i] : -1.0f );
+   }
+}
+
+/*----------------------------------------------------------------------------------------------------------------------------*\
+*                                                           System                                                             *
+\*----------------------------------------------------------------------------------------------------------------------------*/
+
+SystemAlgorithms SystemAlgorithms::Create(bool optimazePerformance, bool optimazeQuality) {
+   SPtr<FeatureDetector> detector;
+   SPtr<DescriptorExtractor> extractor;
+   SPtr<DescriptorMatcher> matcher;
+   SPtr<OpticFlowAlgorithm> tracker = new LucasKanadeAlgorithm;
+
+   // ambos ligados ou ambos desligados -> balanceamento
+   if(!optimazePerformance xor optimazeQuality) {
+      detector = new SIFTDetector(500);
+      extractor = new BRISKExtractor;
+      matcher = new BruteForceMatcher(cv::NORM_HAMMING);
+   } else if(optimazePerformance) {
+      detector = new STARDetector;
+      extractor = new SURFExtractor;
+      matcher = new BruteForceMatcher(cv::NORM_L1);
+   } else { // optimazeQuality
+      detector = new SIFTDetector;
+      extractor = new SIFTExtractor;
+      matcher = new BruteForceMatcher(cv::NORM_L2);
+   }
+
+   return SystemAlgorithms(detector, extractor, matcher, tracker);
 }
 
 } // namespace avr

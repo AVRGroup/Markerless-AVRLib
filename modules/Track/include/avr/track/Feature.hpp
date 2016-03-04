@@ -40,8 +40,8 @@
 //
 //M*/
 
-#if !defined(AVR_FEATURE_STRUCTURES_HPP) && !defined(__OPENCV_FEATURES_2D_HPP__)
-#define AVR_FEATURE_STRUCTURES_HPP
+#if !defined(AVR_FEATURE_HPP) && !defined(__OPENCV_FEATURES_2D_HPP__)
+#define AVR_FEATURE_HPP
 
 namespace cv {
 
@@ -124,4 +124,4 @@ struct DMatch
 
 } // namespace cv
 
-#endif // AVR_FEATURE_STRUCTURES_HPP
+#endif // AVR_FEATURE_HPP

@@ -1,21 +1,29 @@
 /**
- * @file Features.hpp
- * @brief Interfaces for new detectors, extractors and matchers, futhermore it contains specifications for
- *    some of this algorithms presents on OpenCV library
+ * @file Algorithms.hpp
+ * @brief Interfaces for new detectors, extractors, matchers and optical flow techniques.
+ *    Futhermore it contains specifications for some of this algorithms presents on OpenCV library
  * @note More informations about each specifications may be found on
  * <a href="http://docs.opencv.org/modules/features2d/doc/features2d.html">OpenCV documentation</a>
  */
 
-#ifndef AVR_FEATURES_HPP
-#define AVR_FEATURES_HPP
+#ifndef AVR_ALGORITHMS_HPP
+#define AVR_ALGORITHMS_HPP
 
 #include <avr/core/Core.hpp>
-#include "feature_structures.hpp"
+#include "Feature.hpp"
 
 
 namespace avr {
 
 using std::vector;
+
+// base classes in this file
+class FeatureDetector;
+class DescriptorExtractor;
+class DescriptorMatcher;
+class OpticFlowAlgorithm;
+// class for system algorithms setup
+class SystemAlgorithms;
 
 /*----------------------------------------------------------------------------------------------------------------------------*\
 *                                                  Feature Detectors                                                           *
@@ -315,6 +323,99 @@ public:
    void operator() (const Mat& query, const Mat& train, vector<cv::DMatch>& matches) const;
 };
 
+/*----------------------------------------------------------------------------------------------------------------------------*\
+*                                                     Optical Flow                                                             *
+\*----------------------------------------------------------------------------------------------------------------------------*/
+
+//! Abstract base class for optical flow algorithms implementation
+class OpticFlowAlgorithm {
+public:
+   virtual ~OpticFlowAlgorithm() {/* dtor */}
+   /**
+    * Track
+    * @param prevImage [in]   Previous 8-bit image
+    * @param prevTracked [in] Input 2D points for which the flow needs to be found
+    * @param currImage [in]   Current image of the same size and same type as prevImage
+    * @param tracked [out]    Output 2D points containing the calculated new positions of input features in the second image
+    * @param error [out]      Output vector of errors, each element of the vector is set to an error for the corresponding feature
+    */
+   virtual void operator() (const Mat& prevImage, const vector<Point2f>& prevTracked,
+                            const Mat& currImage, vector<Point2f>& tracked,
+                            vector<float>& error) const = 0;
+};
+
+/**
+ * Optical Flow algorithm, by B. Lucas and T. Kanade (1981)
+ */
+class LucasKanadeAlgorithm : public OpticFlowAlgorithm {
+public:
+   LucasKanadeAlgorithm() : OpticFlowAlgorithm() {/* ctor */}
+
+   /**
+    * @brief Calculates an optical flow for a sparse feature set using the iterative Lucas-Kanade method
+    * @note if the flow wasn’t found then the error is set to -1.0
+    */
+   void operator() (const Mat& prevImage, const vector<Point2f>& prevTracked,
+                    const Mat& currImage, vector<Point2f>& tracked,
+                    vector<float>& error) const;
+};
+
+/*----------------------------------------------------------------------------------------------------------------------------*\
+*                                               Global Algorithms Setup                                                        *
+\*----------------------------------------------------------------------------------------------------------------------------*/
+
+/**
+ * @class SystemAlgorithms Algorithms.hpp <avr/track/Algorithms.hpp>
+ * @brief This class defines the vision algorithms used for the system, only algorithms setup here will used during its execution.
+ *
+ * This class together with all interfaces present here make the library highly configurable and customizable.
+ * It is important to choose a good algotithms combination for a better application's performance, to help in this choice
+ * the class provides differents optimization options to build the object.
+ */
+class SystemAlgorithms {
+public:
+   const SPtr<FeatureDetector>      detector;
+   const SPtr<DescriptorExtractor>  extractor;
+   const SPtr<DescriptorMatcher>    matcher;
+   const SPtr<OpticFlowAlgorithm>   tracker;
+
+   //! Initialization construtor
+   SystemAlgorithms( const SPtr<FeatureDetector>&      detector,
+                     const SPtr<DescriptorExtractor>&  extractor,
+                     const SPtr<DescriptorMatcher>&    matcher,
+                     const SPtr<OpticFlowAlgorithm>&   tracker
+                  ) : detector(detector), extractor(extractor), matcher(matcher), tracker(tracker) {/* ctor */}
+
+   //! Copy constructor
+   SystemAlgorithms(const SystemAlgorithms& system) : detector(system.detector), extractor(system.extractor),
+                                                      matcher(system.matcher), tracker(system.tracker) {/* ctor */}
+
+   /**
+    * This method creates the object setting the algorithms based on optimization options that are a better performance or a better quality.
+    * If both flags are set the method chooses a combination trying to find a balancing between performance and quality.
+    */
+   static SystemAlgorithms Create(bool optimazePerformance, bool optimazeQuality);
+
+   // interface for the algorithms
+   //! Detects keypoints in image, see FeatureDetector for more details
+   void Detect(const Mat& image, vector<cv::KeyPoint>& keys) const {
+      if(this->detector != nullptr) (*this->detector)(image, keys);
+   }
+   //! Extracts descriptors of image, see DescriptorExtractor for more details
+   void Extract(const Mat& image, vector<cv::KeyPoint>& keys, Mat& descriptors) const {
+      if(this->extractor != nullptr) (*this->extractor)(image, keys, descriptors);
+   }
+   //! Matches descriptors of images, see DescriptorMatcher for more details
+   void Match(const Mat& query, const Mat& train, vector<cv::DMatch>& matches) const {
+      if(this->matcher != nullptr) (*this->matcher) (query, train, matches);
+   }
+   //! Tracks a set of image points in another image, see OpticFlowAlgorithm for more details
+   void Track(const Mat& prevFrame, const vector<Point2f>& prevTracked, const Mat& currFrame, vector<Point2f>& tracked, vector<float>& error) const {
+      if(this->tracker != nullptr) (*this->tracker) (prevFrame, prevTracked, currFrame, tracked, error);
+   }
+
+};
+
 } // namespace avr
 
-#endif // AVR_FEATURES_HPP
+#endif // AVR_ALGORITHMS_HPP

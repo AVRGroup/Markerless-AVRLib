@@ -42,7 +42,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <avr/core/Handling.hpp>
-#include <avr/track/feature_structures.hpp>
+#include <avr/track/Feature.hpp>
 
 namespace cv {
 

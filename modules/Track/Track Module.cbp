@@ -13,8 +13,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-O2" />
 					<Add option="-std=c++11" />
-					<Add option="-g" />
 					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
@@ -50,15 +50,17 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-std=c++11" />
 			<Add option="-Wall" />
+			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
 			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
 			<Add directory="../Core/include" />
 			<Add directory="../Track/include" />
+			<Add directory="../Camera/include" />
 		</Compiler>
 		<Linker>
 			<Add library="libAVRCoreDbg.a" />
+			<Add library="libAVRCameraDbg.a" />
 			<Add library="libopencv_core2410.dll.a" />
 			<Add library="libopencv_flann2410.dll.a" />
 			<Add library="libopencv_video2410.dll.a" />
@@ -68,19 +70,17 @@
 			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
 			<Add directory="../../lib/avrlib" />
 		</Linker>
-		<Unit filename="include/avr/track/Features.hpp" />
+		<Unit filename="include/avr/track/Algorithms.hpp" />
+		<Unit filename="include/avr/track/Feature.hpp" />
 		<Unit filename="include/avr/track/Marker.hpp" />
-		<Unit filename="include/avr/track/Trackers.hpp" />
 		<Unit filename="include/avr/track/Tracking.hpp" />
-		<Unit filename="include/avr/track/feature_structures.hpp" />
 		<Unit filename="main.cpp">
 			<Option target="TrackTest" />
 		</Unit>
-		<Unit filename="src/Features.cpp" />
+		<Unit filename="src/Algorithms.cpp" />
+		<Unit filename="src/Feature.cpp" />
 		<Unit filename="src/Marker.cpp" />
-		<Unit filename="src/Trackers.cpp" />
 		<Unit filename="src/Tracking.cpp" />
-		<Unit filename="src/feature_structures.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

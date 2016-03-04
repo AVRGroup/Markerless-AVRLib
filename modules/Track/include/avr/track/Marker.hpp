@@ -1,62 +1,63 @@
 #ifndef AVR_MARKER_HPP
 #define AVR_MARKER_HPP
 
+#include <functional>
 #include <avr/core/Core.hpp>
-#include "feature_structures.hpp"
 
 namespace avr {
 
 using std::vector;
 
+// TEMP
+class Model {
+public:
+   virtual ~Model() {/* dtor */}
+   virtual Draw(const TMatx&) = 0;
+};
+
+/*
+   REMODELAGEM
+   - somente SystemTracking como friend de Marker
+   - em SystemTracking cria métodos pack e unpack para as propriedades do marker necessárias
+*/
+
+typedef vector<Point2f> Coords2D;
+typedef vector<Point3f> Coords3D;
+
+struct PreMarker {
+   PreMarker(const std::string& path, const SPtr<Model>& model) : path(path), model(model) {/* ctor */}
+
+   std::string path;
+   SPtr<Model> model;
+};
+
 class Marker {
 public:
-   Marker();
-   virtual ~Marker() = 0;
+   virtual ~Marker() {/* dtor */};
 
-   inline const TMatx& GetPose() const { return this->pose; }
-   inline ubyte GetID() const { return this->id; }
-   inline bool IsLost() const { return this->lost; }
+   Size2i GetSize() const;
 
-protected:
-   inline void SetPose(const TMatx& _pose) { this->pose = _pose; }
-   inline void SetLost(bool _lost) { this->lost = _lost; }
+   const Coords2D& GetWorld() const { return this->world; }
+   SPtr<Model> GetModel() const     { return this->model; }
+   size_t GetID() const             { return this->id; }
+   bool Lost() const                { return this->lost; }
 
+   void SetLost(bool lost) { this->lost = lost; }
+
+private:
+   Marker(const Size2i&, const Coords2D&, const cv::Mat, const SPtr<Model>&);
+
+private:
+   size_t id;
    bool lost;
-   TMatx pose;
+   cv::Mat descs;
+   Coords2D keys;
+   Coords2D world;
+   SPtr<Model> model;
 
-private:
-   ubyte        id;
-   static ubyte counter;
-};
+   static size_t counter;
 
-class NaturalMarker : public Marker {
-public:
-   explicit NaturalMarker(const std::string& imagePath);
-
-   inline const Size2i& GetSize() const { return this->size; }
-   inline const BRect<int>& GetRegion() const { return this->region; }
-
-   friend class FeatureTracker;
-   friend class MotionTracker;
-
-private:
-   inline void Get(avr::Mat& out) const { out = this->descriptors; }
-   inline void Get(vector<cv::KeyPoint>& out) const { out = this->keypoints; }
-   inline void SetRegion(const BRect<int>& _region) { this->region = _region; }
-
-   vector<cv::KeyPoint> keypoints;
-   avr::Mat descriptors;
-   BRect<int> region;
-   Size2i size;
-};
-
-struct Frame {
-   vector<cv::KeyPoint> keypoints;
-   avr::Mat descriptors;
-   avr::Mat image;
-
-   Frame() {/* ctor */} //< TODO
-   Frame(const Mat& _image) : image(_image) {/* ctor */}
+   friend class TrackingSystem;
 };
 
 } // namespace avr
