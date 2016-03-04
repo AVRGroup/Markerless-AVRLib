@@ -280,7 +280,7 @@ class CameraAxisView : Interface{
             }
 
             glColor4f(0.7, 0.4, 0.0, 1.0);
-            glTranslatef(37.5, -62.5, 13.0);
+            //glTranslatef(37.5, -62.5, 13.0);
             glScalef(1.5, 2.5, 0.5);
             glutSolidCube(50.0);
 

@@ -1,42 +1,109 @@
 #ifndef AVR_APPLICATION_HPP
 #define AVR_APPLICATION_HPP
 
-#include <avr/camera/Camera.hpp>
-#include <avr/track/Trackers.hpp>
+#include <atomic>
+
+#include <avr/core/Core.hpp>
 #include <avr/view/Window.hpp>
+#include <avr/camera/Camera.hpp>
+#include <avr/track/Tracking.hpp>
 
 namespace avr {
 
+/**
+ * @class Application Application.hpp <avr/Application.hpp>
+ * @brief Manages the augmented reality application for
+ */
 class Application {
 public:
-   virtual ~Application() {/* dtor */}
+   /**
+    * @class Application::Builder Application.hpp <avr/Application.hpp>
+    * @brief Configures an avr::Application before build it
+    */
+   class Builder : avr::Builder<Application> {
+   public:
+      Builder() : avr::Builder<Application>(), cam(nullptr), path(""), label("AVR Application"), methods(nullptr) {/* ctor */}
+      ~Builder() { cam = nullptr; path.clear(); label.clear(); methods = nullptr; markers.clear(); }
 
-   static SPtr<Application> New(size_t videoDevice = 0);
-   static SPtr<Application> New(const std::string& videoFile);
+      //! sets the avr::Camera object
+      Builder& camera(const Camera& cam) {
+         this->cam = new Camera(cam);
+         return * this;
+      }
+      //! sets the avr::Camera object via configuration file path
+      Builder& camera(const std::string& path) {
+         this->cam = new Camera(path);
+         return * this;
+      }
+      //! sets the avr::SystemAlgorithms object
+      Builder& algorithms(const SystemAlgorithms& alg) {
+         this->methods = new SystemAlgorithms(alg);
+         return * this;
+      }
+      //! sets the avr::SystemAlgorithms object via optimaze flags
+      Builder& optimaze(bool performance, bool quality) {
+         this->methods = new SystemAlgorithms(SystemAlgorithms::Create(performance, quality));
+         return * this;
+      }
+      //! adds a builder to an avr::Marker
+      Builder& marker(const PreMarker& mk) {
+         this->markers.push_back(mk);
+         return * this;
+      }
+      //! [optional] sets a video file path (if it does not set then uses the web cam)
+      Builder& video(const std::string& path) {
+         this->path = path;
+         return * this;
+      }
+      //! [optional] sets an application's name that will appear as a window's title
+      Builder& name(const std::string& label) {
+         this->label = label;
+         return * this;
+      }
+      //! @overwrite
+      //! @brief builds a new avr::Application instance
+      SPtr<Application> build() const {
+         if(!cam or !methods or markers.size() < 1)
+            AVR_ERROR(Cod::Undefined, "missing some configurations");
+         return new Application(*this);
+      }
 
-   void SetWindow(const Window::Builder& win);
-   void SetCameraFile(const std::string& file);
-   void RegistryMarker(const SPtr<Marker>&);
+   private:
+      Camera* cam;
+      std::string path;
+      std::string label;
+      SystemAlgorithms* methods;
+      std::vector<PreMarker> markers;
 
+      friend class Application;
+   };
+
+   virtual ~Application();
+
+   //! starts application's execution
    void Start();
+   //! stops application's execution and performs a cleanup
    void Stop();
 
+   //! pauses application's execution
    void Pause();
-   void Restart();
+   //! resumes application's execution after a pause
+   void Resume();
+
+   //! adds a new event listener to application's window
+   void AddListener(const EventListener&);
+
+   //! takes a screenshot of the application @return the screen image
+   cv::Mat Screenshot();
 
 private:
-   class Capturer;
-   Application(Capturer&);
+   Application(const Builder&);
 
-   Capturer&      cap;
-   SPtr<Window>   win;
-   SPtr<Camera>   cam;
-   SPtr<Renderer> rdr;
+private:
+   class AppRenderer;
 
-   Set<Marker> markers;
-
-   static SPtr<Application> instance;
-
+   size_t id;
+   SPtr<AppRenderer> app;
 };
 
 } // namespace avr

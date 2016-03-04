@@ -58,8 +58,8 @@ GLUT::Window::Window(const string& label) : Super(glutCreateWindow(label.c_str()
 
 bool GLUT::Window::Destroy() {
    if(glutGetWindow()) {
-      size_t id = Super::GetID();
-      glutDestroyWindow(id);
+      this->renderer->Release();
+      glutDestroyWindow(Super::GetID());
       return true;
    }
    return false;

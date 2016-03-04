@@ -11,7 +11,7 @@ using namespace avr;
 
 const unsigned IT_MAX = 72;
 
-Camera::Camera(const std::string& filename) : intrinsecs(), resolution(Size2d(0.0, 0.0)) {
+Camera::Camera(const std::string& filename) : intrinsecs(), resolution(Size2f(0.0, 0.0)) {
    cv::FileStorage reader(filename, cv::FileStorage::READ);
    cv::Mat cameraMatrix, distCoeffs;
 
@@ -24,8 +24,10 @@ Camera::Camera(const std::string& filename) : intrinsecs(), resolution(Size2d(0.
    distCoeffs.copyTo(this->distortion);
 }
 
-TMatx Camera::Pose(const std::vector<Point3d>& world, const std::vector<Point2d>& location, bool lost) const {
+TMatx Camera::Pose(const std::vector<Point3f>& world, const std::vector<Point2f>& location, bool lost) const {
    static bool first = true;
+
+   AVR_ASSERT(world.size() == location.size());
 
    cv::Vec3d   rotVec;
    cv::Vec3d   translat;
@@ -42,19 +44,19 @@ TMatx Camera::Pose(const std::vector<Point3d>& world, const std::vector<Point2d>
    return TMatx(rotation, translat);
 }
 
-TMatx Camera::Pose(const std::vector<Point2d>& world, const std::vector<Point2d>& location, bool lost) const {
-   std::vector<Point3d> _world(world.begin(), world.end());
+TMatx Camera::Pose(const std::vector<Point2f>& world, const std::vector<Point2f>& location, bool lost) const {
+   std::vector<Point3f> _world(world.begin(), world.end());
    return this->Pose(_world, location, lost);
 }
 
-TMatx Camera::Projection(double near, double far) const {
-   const double& width = resolution.width;
-   const double& height = resolution.height;
+TMatx Camera::Projection(float near, float far) const {
+   const float& width = resolution.width;
+   const float& height = resolution.height;
 
-   const double& fx = intrinsecs(0, 0);
-   const double& fy = intrinsecs(1, 1);
-   const double& cx = intrinsecs(0, 2);
-   const double& cy = intrinsecs(1, 2);
+   const float& fx = intrinsecs(0, 0);
+   const float& fy = intrinsecs(1, 1);
+   const float& cx = intrinsecs(0, 2);
+   const float& cy = intrinsecs(1, 2);
 
    TMatx projection;
    projection(0, 0) = 2.0 * fx / width;
@@ -69,19 +71,19 @@ TMatx Camera::Projection(double near, double far) const {
    return projection;
 }
 
-void Camera::Convert(const std::vector<Point2d>& imageCoord, std::vector<Point3d>& worldCoord) const {
-   Point2d c = Point2d(resolution.width/2.0, resolution.height/2.0);
-   Point2d f = Point2d(intrinsecs(0, 0), intrinsecs(1, 1));
+void Camera::Convert(const std::vector<Point2f>& imageCoord, std::vector<Point3f>& worldCoord) const {
+   Point2f c = Point2f(resolution.width/2.0, resolution.height/2.0);
+   Point2f f = Point2f(intrinsecs(0, 0), intrinsecs(1, 1));
 
    worldCoord.clear();
    for(auto pi : imageCoord)
-      worldCoord.push_back(Point3d( (pi.x - c.x) / f.x, (pi.y - c.y) / f.y, 1.0 ));
+      worldCoord.push_back(Point3f( (pi.x - c.x) / f.x, (pi.y - c.y) / f.y, 1.0 ));
 }
-void Camera::Convert(const std::vector<Point3d>& worldCoord, std::vector<Point2d>& imageCoord) const {
-   Point2d c = Point2d(resolution.width/2.0, resolution.height/2.0);
-   Point2d f = Point2d(intrinsecs(0, 0), intrinsecs(1, 1));
+void Camera::Convert(const std::vector<Point3f>& worldCoord, std::vector<Point2f>& imageCoord) const {
+   Point2f c = Point2f(resolution.width/2.0, resolution.height/2.0);
+   Point2f f = Point2f(intrinsecs(0, 0), intrinsecs(1, 1));
 
    imageCoord.clear();
    for(auto pw : worldCoord)
-      imageCoord.push_back(Point2d( f.x * pw.x + c.x, f.y * pw.y + c.y ));
+      imageCoord.push_back(Point2f( f.x * pw.x + c.x, f.y * pw.y + c.y ));
 }

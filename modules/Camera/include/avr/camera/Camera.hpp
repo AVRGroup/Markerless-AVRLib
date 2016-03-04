@@ -12,28 +12,28 @@ public:
    virtual ~Camera() {/* dtor */}
 
    //! @return The camera's pose matrix
-   TMatx Pose(const std::vector<Point3d>& world,
-             const std::vector<Point2d>& location,
+   TMatx Pose(const std::vector<Point3f>& world,
+             const std::vector<Point2f>& location,
              bool lost = true) const;
 
    //! @return The camera's pose matrix
    //! @note param world is a 3D world coordinates with z = 0
-   TMatx Pose(const std::vector<Point2d>& world,
-             const std::vector<Point2d>& location,
+   TMatx Pose(const std::vector<Point2f>& world,
+             const std::vector<Point2f>& location,
              bool lost = true) const;
 
    //! @return The camera's projection matrix
-   TMatx Projection(double near, double far) const;
+   TMatx Projection(float near, float far) const;
 
    //! @brief Convert from image coordinates to world coordinates
-   void Convert(const std::vector<Point2d>& imageCoord, std::vector<Point3d>& worldCoord) const;
+   void Convert(const std::vector<Point2f>& imageCoord, std::vector<Point3f>& worldCoord) const;
    //! @brief Convert from world coordinates to image coordinates
-   void Convert(const std::vector<Point3d>& worldCoord, std::vector<Point2d>& imageCoord) const;
+   void Convert(const std::vector<Point3f>& worldCoord, std::vector<Point2f>& imageCoord) const;
 
 private:
-   std::vector<double>  distortion;
-   Matx<double, 3, 3>   intrinsecs;
-   Size_<double>        resolution;
+   std::vector<float>  distortion;
+   Matx<float, 3, 3>   intrinsecs;
+   Size_<float>        resolution;
 };
 
 }
