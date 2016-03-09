@@ -23,7 +23,7 @@ Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada sem mar
 	* Criar uma especificação da classe Model para renderização do modelo virtual
 	* Construir um objeto __Application__ utilizando a interface __Application::Builder__
 	* Iniciar a aplicação por meio da chamada para o método __Application::Start()__
-* Na construção do objeto são definidos os marcadores, arquivo da câmera, algoritmos utilizados e o vídeo (gravado ou webcam)
+* Na construção do objeto são definidos os marcadores, arquivo da câmera, algoritmos, o vídeo entre outros
 	* Para os marcadores são necessários o arquivo com sua imagem, preferencialmente ortogonal, e a instância do objeto Model
 	* Os algoritmos podem ser definidos criando-se um objeto de __SystemAlgorithms__ ou definindo as _flags_ de otimização
 		* Otimização por performance utiliza detector STAR, extrator SURF e _matcher brute force_ L1
