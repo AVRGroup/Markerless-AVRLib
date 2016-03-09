@@ -77,5 +77,35 @@ int main(int argc, char* args[]){
 //      cout << mq * p << endl;
 //   }
 
+   cout.flags(std::ios::fixed);
+   cout.precision(5);
+//
+//   Quaternion q(Deg(90), Point3d(0, 0, 1));
+//   cout << q << endl;
+//   cout << q.GetMatrix() << endl << endl;
+//
+//   Quaternion r(Deg(34), Point3d(0.52, 0.74, 0.91));
+//   cout << r << endl;
+//   cout << r.GetMatrix() << endl << endl;
+//
+//   Quaternion p = q * r * q.Inv();
+//   cout << p << endl;
+//   cout << p.GetMatrix() << endl << endl;
+//
+//   Quaternion s = (q.GetMatrix() * r.GetMatrix()).GetQuaternion();
+//   cout << s << endl;
+//   cout << s.GetMatrix() << endl << endl;
+//   cout << (q.GetMatrix() * r.GetMatrix()) << endl;
+
+   Quaternion q(Deg(34), Point3d(0.52, 0.74, 0.91));
+   cout << q << endl;
+   cout << q.GetMatrix() << endl << endl;
+
+   Point3d p(1, 1, 1);
+   cout << p << endl << endl;
+
+   cout << (q * p * q.Inv()) << endl;
+   cout << (q.GetMatrix() * p) << endl;
+
    return 0;
 }

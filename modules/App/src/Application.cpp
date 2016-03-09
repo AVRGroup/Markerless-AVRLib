@@ -7,6 +7,8 @@
 
 #include <GL/glext.h>
 
+#include <sstream>
+
 namespace avr {
 
 using std::string;
@@ -14,7 +16,7 @@ using std::string;
 class Application::AppRenderer : public avr::Renderer {
 public:
    AppRenderer(const SPtr<Camera>& cam, const SystemAlgorithms& methods, const vector<PreMarker>& setup, const std::string& video)
-   : frame(), cap(), cam(cam), markers(), run(false), pause(false), count(0), time(0.0) {
+   : id(0), frame(), cap(), cam(cam), markers(), run(false), pause(false), count(0), time(0.0) {
       this->cap = (video != "") ? cv::VideoCapture(video) : cv::VideoCapture(0);
       this->frame = cv::Mat(cap.get(CV_CAP_PROP_FRAME_HEIGHT), cap.get(CV_CAP_PROP_FRAME_WIDTH), CV_8UC3);
 
@@ -33,10 +35,21 @@ public:
    void Update();
    void Release();
 
+   void SetID(size_t id) { this->id = id; };
+
 private:
    void ProjectFrame(const GLvoid* image, GLsizei width, GLsizei height) const;
 
+   std::string GetLabel(const std::string& mode) const {
+      double fps = double(this->count)/((cv::getTickCount() - this->time) / cv::getTickFrequency());
+      std::stringstream stream;
+      stream.precision(5);
+      stream << mode << " " << fps << "fps";
+      return stream.str();
+   }
+
 private:
+   size_t id;
    mutable cv::Mat frame;
    mutable cv::VideoCapture cap;
 
@@ -63,6 +76,7 @@ Application::Application(const Builder& builder) : id(0), app(nullptr) {
    win->SetSize(this->app->frame.size());
    win->SetRenderer(this->app);
    this->id = win->GetID();
+   this->app->SetID(this->id);
 }
 
 Application::~Application() {
@@ -106,14 +120,25 @@ void Application::AppRenderer::Render() const {
 
       this->count++;
 
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      glDepthFunc(GL_LEQUAL);
+      glEnable(GL_DEPTH_TEST);
+
+      TMatx proj = this->cam->Projection(0.01, 1000.0);
+      glMatrixMode(GL_PROJECTION);
+      glLoadMatrixd(proj.T().Get().val);
+
       // computer visio process //
       for(auto& marker : this->markers) {
          TrackResult result;
          if(marker.Lost()) {
             result = this->featureTracker->Track(marker, scene);
             this->motionTracker->Set(scene, result);
+            WindowManager::Get(this->id)->SetLabel(GetLabel("LOST"));
          } else {
             result = this->motionTracker->Track(marker, scene);
+            WindowManager::Get(this->id)->SetLabel(GetLabel("TRACKING"));
          }
 
          if(result.scenePoints.size() > 20)
@@ -127,8 +152,18 @@ void Application::AppRenderer::Render() const {
             Mat homography = cv::findHomography(result.targetPoints, result.scenePoints, cv::RANSAC, 4);
             cv::perspectiveTransform(markerCorners, sceneCorners, homography);
 
-   //         TMatx pose = this->cam->Pose(markerCorners, sceneCorners, marker.Lost());
-   //         marker.GetModel().Draw(pose);
+            Coords3D world = Coords3D(4);
+            Point3f center(marker.GetSize().width/2.0, marker.GetSize().height/2.0, 0.0f);
+            world[0] = Point3f(-center.x, -center.y, 0.0f);
+            world[3] = Point3f(-center.x, +center.y, 0.0f);
+            world[2] = Point3f(+center.x, +center.y, 0.0f);
+            world[1] = Point3f(+center.x, -center.y, 0.0f);
+
+            TMatx pose = this->cam->Pose(world, sceneCorners, marker.Lost());
+            glMatrixMode(GL_MODELVIEW);
+            glLoadMatrixd(pose.T().Get().val);
+
+            marker.GetModel()->Draw(pose);
 
             if(!sceneCorners.empty()) {
                cv::line(scene, sceneCorners[0], sceneCorners[1], cv::Scalar(0, 255, 0), 4);
@@ -141,20 +176,14 @@ void Application::AppRenderer::Render() const {
          for(auto p : result.scenePoints) {
             cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
          }
+
+         Mat flipped;
+         cv::flip(scene, flipped, 0);
+         ProjectFrame(flipped.ptr<GLubyte>(0), (GLsizei) flipped.cols, (GLsizei) flipped.rows);
       }
       // computer visio process end //
 
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      Mat flipped;
-      cv::flip(scene, flipped, 0);
-      ProjectFrame(flipped.ptr<GLubyte>(0), (GLsizei) flipped.cols, (GLsizei) flipped.rows);
-
-//      Matx44f proj;
-//      GetProjection(proj);
-//      glMatrixMode(GL_PROJECTION);
-//      glLoadMatrixf(proj.t().val);
-
+      glDisable(GL_DEPTH_TEST);
       glutSwapBuffers ();
    }
 }

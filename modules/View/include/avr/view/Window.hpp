@@ -32,6 +32,7 @@ public:
    virtual Point2i GetPosition() const = 0;
    virtual void SetSize(const Size2i&) = 0;
    virtual void SetPosition(const Point2i&) = 0;
+   virtual void SetLabel(const std::string& label) = 0;
 
    void AddListener(const SPtr<EventListener>& listener);
    void SetRenderer(const SPtr<Renderer>& renderer);

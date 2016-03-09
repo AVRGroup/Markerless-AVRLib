@@ -45,9 +45,14 @@ public:
          this->methods = new SystemAlgorithms(SystemAlgorithms::Create(performance, quality));
          return * this;
       }
-      //! adds a builder to an avr::Marker
+      //! adds a prepared marker to build an avr::Marker
       Builder& marker(const PreMarker& mk) {
          this->markers.push_back(mk);
+         return * this;
+      }
+      //! prepares a marker given its image path and renderer model and adds it
+      Builder& marker(const std::string& path, const SPtr<Model> model) {
+         this->markers.push_back(PreMarker(path, model));
          return * this;
       }
       //! [optional] sets a video file path (if it does not set then uses the web cam)

@@ -12,7 +12,7 @@ using std::vector;
 class Model {
 public:
    virtual ~Model() {/* dtor */}
-   virtual Draw(const TMatx&) = 0;
+   virtual void Draw(const TMatx&) = 0;
 };
 
 /*

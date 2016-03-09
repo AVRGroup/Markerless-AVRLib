@@ -7,6 +7,5 @@
 		<Project filename="Track/Track Module.cbp" />
 		<Project filename="View/View Module.cbp" />
 		<Project filename="Model/Model Module.cbp" />
-		<Project filename="../samples/Externo 01/ExemploExterno01.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
