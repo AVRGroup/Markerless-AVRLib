@@ -16,7 +16,7 @@ Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada sem mar
 ### Sobre
 * A __Markerless AVRLib__ é implementada em C++11. Utiliza os algoritmos de visão computacional presentes no OpenCV. Foi compilada com o _MinGW G++_ 4.9 utilizando a IDE _Code::Blocks_ 16.01;
 * A biblioteca, em sua primeira versão, é composta por 5 módulos: `Application`, `Camera`, `Core`, `Track` e `View`;
-* Cada projeto possui diferentes __targets__ para criação de _libs_ ou executáveis em modo _debug_ ou _release_;
+* Cada projeto possui diferentes _targets_ para criação de _libs_ ou executáveis em modo _debug_ ou _release_;
 * Exceto a `Application`, os demais módulos geram _static libraries_ que são _linkadas_ pela `Application`;
 * As aplicações no momento devem ser implementadas no projeto `Application`;
 
@@ -38,7 +38,7 @@ Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada sem mar
 	* Para os marcadores são necessários o arquivo com sua imagem, preferencialmente ortogonal, e a instância do objeto Model
 	* Os algoritmos podem ser definidos criando-se um objeto de `SystemAlgorithms` ou definindo as _flags_ de otimização
 		* Otimização por performance utiliza detector `STAR`, extrator `SURF` e _matcher_ `Brute Force L1`;
-		* Otimização por qualidade utiliza detector e extrator `SIFT` e _matcher_ `Brute Force_ L2`;
+		* Otimização por qualidade utiliza detector e extrator `SIFT` e _matcher_ `Brute Force L2`;
 		* Otimização por balanceamento utiliza detector `SIFT`, extrator `BRISK` e _matcher_ `Brute Force Hamming`;
 	* Definindo um vídeo pré-gravado a biblioteca fará o precessamento sobre ele, caso contrário, a webcam é aberta
 * Mais detalhes podem ser encontrados na documentação do código
@@ -49,9 +49,9 @@ Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada sem mar
 A seguir são listados alguns diretórios utilizados no processo de instação e configuração do opencv. Recomenda-se utilizar os mesmos diretórios sugeridos, dipensando alterações nos projetos da AVRLib, mas pode-se utilizar quaisquer outros caminhos.
 
 * `%MINGW_PATH%`		Diretório de instalação do compilador MinGW;
-* `%OPENCV_PATH%`		Diretório com os arquivos do opencv baixados e extraídos. Sugestão: __C:\opencv__;
-* `%OPENCV_CMAKE%`		Diretório onde serão gerados os arquivos _cmake_. Sugestão: __%OPENCV_PATH%/build/x86/mingw__
-* `%OPENCV_INSTALL%`	Diretório onde serão gerados os _headers_ e binários do opencv. Sugestão: __%OPENCV_PATH%/install__
+* `%OPENCV_PATH%`		Diretório com os arquivos do opencv baixados e extraídos. Sugestão: `C:\opencv`;
+* `%OPENCV_CMAKE%`		Diretório onde serão gerados os arquivos _cmake_. Sugestão: `%OPENCV_PATH%/build/x86/mingw`
+* `%OPENCV_INSTALL%`	Diretório onde será instalado o opencv. Sugestão: `%OPENCV_PATH%/install`
 
 ### _Downloads_
 São necessários os seguintes _softwares_:
@@ -63,7 +63,7 @@ São necessários os seguintes _softwares_:
 * Adicione o diretório `%MINGW_PATH%/bin` na variável de ambiente __PATH__;
 * Extraia os arquivos do opencv para `%OPENCV_PATH%`
 * Execute o _CMake_ e siga os seguintes passos:
-	* Em "_where is the source code_" adicione o diretório `%OPENCV_PATH/source%`
+	* Em "_where is the source code_" adicione o diretório `%OPENCV_PATH%/source`
 	* Em "_where to build the binaries_" adicione o diretório `%OPENCV_CMAKE%`
 	* Clique em _Configure_ 
 	* Selecione:
@@ -76,7 +76,7 @@ São necessários os seguintes _softwares_:
 * Abra o __prompt de comando__ e navegue até a pasta `%OPENCV_CMAKE%`;
 * Execute o comando `mingw32-make` e aguarde (pode levar vários minutos);
 * Execute o comando `mingw32-make install` e aguarde alguns segundos;
-* Adicione o diretório `%OPENCV_INSTALL/.../bin%` na variável de ambiente __PATH__;
+* Adicione o diretório `%OPENCV_INSTALL%/.../bin` na variável de ambiente __PATH__;
 * Por fim, abra o projeto `App Module.cbp`, edite os caminhos para os arquivos do opencv e tente compilar o projeto;
 
 ### OpenCV Flags
