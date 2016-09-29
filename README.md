@@ -1,5 +1,5 @@
 # Markerless AVRLib
-Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada sem marcadores
+Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada baseada em marcadores naturais.
 
 * [Primeira Versão Funcional](#primeira-versão-funcional)
 	* [Sobre](#sobre)
@@ -40,7 +40,7 @@ Desenvolvimento da biblioteca Markerless AVRLib para Realidade Aumentada sem mar
 		* Otimização por performance utiliza detector `STAR`, extrator `SURF` e _matcher_ `Brute Force L1`;
 		* Otimização por qualidade utiliza detector e extrator `SIFT` e _matcher_ `Brute Force L2`;
 		* Otimização por balanceamento utiliza detector `SIFT`, extrator `BRISK` e _matcher_ `Brute Force Hamming`;
-	* Definindo um vídeo pré-gravado a biblioteca fará o precessamento sobre ele, caso contrário, a webcam é aberta
+	* Definindo um vídeo pré-gravado a biblioteca fará o processamento sobre ele, caso contrário, a webcam é aberta
 * Mais detalhes podem ser encontrados na documentação do código
 
 ## Configuração do OpenCV
