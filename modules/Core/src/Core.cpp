@@ -1,4 +1,6 @@
 #include <avr/core/Core.hpp>
+#include <avr/core/SafeFloatPoint.hpp>
+
 
 #ifdef __cplusplus
 

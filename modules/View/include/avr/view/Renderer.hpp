@@ -3,6 +3,10 @@
 
 namespace avr {
 
+// TODO: Remodelar a classe para ser uma interface OO ao opengl e não somente o mainloop da aplicação
+// O mainloop será função da Application, o Renderer é um objeto isolado que provê recursos para renderização
+// de modelos e configuração do ambiente virtual
+
 class Renderer {
 public:
    virtual ~Renderer() {/* dtor */}

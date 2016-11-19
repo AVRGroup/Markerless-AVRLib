@@ -9,7 +9,6 @@
 
 #include <opencv/core/core.hpp>
 #include <avr/core/SafePointer.hpp>
-#include <avr/core/SafeFloatPoint.hpp>
 
 namespace avr {
 
