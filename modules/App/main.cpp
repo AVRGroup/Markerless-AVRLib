@@ -3,72 +3,75 @@
 
 #include <avr/Application.hpp>
 #include <avr/view/ogl/Window.hpp>
+#include <avr/view/ogl/Listeners.hpp>
 
 using namespace avr;
 
 using std::cout;
+using std::cerr;
 using std::endl;
 
-class CubeModel : public Model {
+class Keyboard : public GLUT::AsciiKeyListener {
 public:
-   //! @overwrite
-   void Draw(const TMatx& pose) {
-      glColor3d(0, 0.6, 1.0);
-      glPushMatrix();
-         glEnable(GL_LIGHTING);
-         glEnable(GL_LIGHT0);
-         setupLight(pose.Inv());
+   void Listen(const GLUT::AsciiKeyEvent& evt) const {
+      static bool paused = true;
 
-         glTranslatef(0.0f, 0.0f, -25.0f);
-         glutSolidCube(50);
+      if(evt.pressed) {
+         switch(evt.key) {
+            case Keyboard::ESQ:
+               app->Stop();
+               break;
 
-         glDisable(GL_LIGHTING);
-      glPopMatrix();
-   }
+            case 's': case 'S':
+               app->Screenshot();
+               break;
 
-   void setupLight(const TMatx& pose){
-      static int  mat_f = 1;
-      GLfloat     mat_amb_diff[]  = {0.9, 0.9, 0.0, 1.0};
-      GLfloat     mat_specular[]  = {0.5, 0.5, 0.5, 1.0};
-      GLfloat     mat_shininess[] = {10.0};
-      GLfloat     light_ambient[] = { 0.01, 0.01, 0.01, 1.0 };
-      GLfloat     light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
-      GLfloat     light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-      GLfloat     light_position[] = { float(pose(0, 3)), float(pose(1, 3)), float(pose(2, 3)), 1.0 };
-
-      if( mat_f )
-      {
-         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, mat_amb_diff);
-         glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-         glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-         glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-         glEnable(GL_COLOR_MATERIAL);
-         mat_f = 0;
+            case ' ':
+               (paused) ? app->Resume() : app->Pause();
+               paused = !paused;
+               break;
+         }
       }
-
-      glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-      glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-      glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-      glLightfv(GL_LIGHT0, GL_POSITION, light_position);
    }
+
+   Keyboard(const SPtr<Application>& _app) : app(_app) {/* ctor */}
+
+   mutable SPtr<Application> app;
+   static const int ESQ = 27;
 };
 
 int main() {
+   // configure the augmentation model
+   SPtr<Model> model = FactoryModel::OBJ("../data/obj/f-16.obj");
+   model->ComputeFacetNormals();
+   model->ComputeVertexNormals();
+
+   SystemAlgorithms sift = SystemAlgorithms(new SIFTDetector(1000), new SIFTExtractor, new BruteForceMatcher(cv::NORM_L2), new LucasKanadeAlgorithm);
+//   SystemAlgorithms surf = SystemAlgorithms(new SURFDetector, new SURFExtractor, new BruteForceMatcher(cv::NORM_L2), new LucasKanadeAlgorithm);
+//   SystemAlgorithms orb  = SystemAlgorithms(new ORBDetector, new ORBExtractor, new BruteForceMatcher(cv::NORM_HAMMING), new LucasKanadeAlgorithm);
+
    // configure application and build it
    SPtr<Application> app = Application::Builder()
                // define um vídeo pré-gravado para a aplicação
                // caso essa propriedade não seja definida usa-se a webcam
-               .video("../data/rabin_scene.mp4")
+               .video("../data/cormem_scene.mp4")
                // define o arquivo de configuração da câmera
                .camera("../data/camera.yml")
                // define a imagem do marcador e o renderer associado
-               .marker("../data/rabin_object.jpg", new CubeModel)
+               .marker("../data/cormem_object.jpg", model)
                // habilita modos de otimização na ordem performance, qualidade
                // se ambas flags são definidas, faz-se otimização de balanceamento
-               .optimaze(true, false)
+//               .optimize(false, true)
+               .algorithms(sift)
                // constroi a aplicação
                .build();
 
+   // compiles and saves the model's in graphic card memory (optimazes rendering)
+   model->Compile();
+
+   // set event listeners
+   app->AddListener(new Keyboard(app));
+   // starts the application
    app->Start();
 
    return 0;

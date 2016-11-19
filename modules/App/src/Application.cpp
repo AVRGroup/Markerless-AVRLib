@@ -7,10 +7,14 @@
 
 #include <GL/glext.h>
 
+#include <ctime>
+#include <chrono>
 #include <sstream>
 
 namespace avr {
 
+using std::cout;
+using std::cerr;
 using std::string;
 
 class Application::AppRenderer : public avr::Renderer {
@@ -20,13 +24,12 @@ public:
       this->cap = (video != "") ? cv::VideoCapture(video) : cv::VideoCapture(0);
       this->frame = cv::Mat(cap.get(CV_CAP_PROP_FRAME_HEIGHT), cap.get(CV_CAP_PROP_FRAME_WIDTH), CV_8UC3);
 
-      this->featureTracker = new avr::FeatureTracker(methods);
-      this->motionTracker = new avr::MotionTracker(Mat(), TrackResult(), methods);
+      this->tracker = new avr::HybridTracker(methods);
 
       this->markers.reserve(setup.size());
       for(auto it : setup) {
-         SPtr<Marker> marker = this->featureTracker->Unpack(it);
-         this->markers.push_back(* marker);
+         Marker marker = this->tracker->Registry(it);
+         this->markers.push_back(marker);
       }
    }
 
@@ -40,22 +43,24 @@ public:
 private:
    void ProjectFrame(const GLvoid* image, GLsizei width, GLsizei height) const;
 
-   std::string GetLabel(const std::string& mode) const {
+   enum MODE { LOST, TRACKING };
+
+   std::string GetLabel(const MODE& mode) const {
       double fps = double(this->count)/((cv::getTickCount() - this->time) / cv::getTickFrequency());
       std::stringstream stream;
       stream.precision(5);
-      stream << mode << " " << fps << "fps";
+      stream << (mode == LOST ? "LOST " : "TRACKING ") << fps << "fps";
       return stream.str();
    }
 
 private:
+   // TODO: Arrumar essa zona!!
    size_t id;
    mutable cv::Mat frame;
    mutable cv::VideoCapture cap;
 
    mutable SPtr<Camera> cam;
-   mutable SPtr<FeatureTracker> featureTracker;
-   mutable SPtr<MotionTracker> motionTracker;
+   mutable SPtr<HybridTracker> tracker;
 
    mutable vector<Marker> markers;
 
@@ -93,6 +98,7 @@ void Application::Start() {
 
 void Application::Stop() {
    this->app->run = false;
+   WindowManager::Destroy(this->id);
    this->app->time = (double)(cv::getTickCount() - this->app->time) / cv::getTickFrequency();
    cout << (double(this->app->count)/this->app->time) << " fps\n";
    //GLUT::LeaveMainLoop();
@@ -106,6 +112,27 @@ void Application::Resume() {
    this->app->pause = false;
 }
 
+void Application::AddListener(const SPtr<EventListener>& ltn) {
+   SPtr<Window> win = WindowManager::Get(this->id);
+   win->AddListener(ltn);
+}
+
+cv::Mat Application::Screenshot() {
+   char outname[64];
+   time_t rawtime = std::time(nullptr);
+   std::strftime(outname, 64, "screenshot_%Y%m%d_%H%M%S.jpg", std::localtime(&rawtime));
+
+   Mat screen(480, 640, CV_8UC3);
+   glReadPixels(0, 0, 640, 480, GL_BGR, GL_UNSIGNED_BYTE, screen.data);
+   cv::flip(screen, screen, 0);
+
+   bool ok = cv::imwrite(string(outname), screen);
+   if(ok) cout << "Screenshot captured\n";
+   else   cerr << "Did not capture screenshot\n";
+
+   return screen;
+}
+
 /*-------------------------------------------------------------------------------------------------------------------------------------------*\
 *                                                                  Renderer                                                                   *
 \*-------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -114,9 +141,10 @@ void Application::Resume() {
 void Application::AppRenderer::Render() const {
    // render if I can
    if(this->run && !this->pause) {
-      Mat scene;
-      this->cap >> scene;
-      if(scene.empty()) return;
+      Frame scene;
+      this->cap >> scene.image;
+      if(scene.image.empty()) return;
+      this->frame = scene.image;
 
       this->count++;
 
@@ -130,26 +158,24 @@ void Application::AppRenderer::Render() const {
       glLoadMatrixd(proj.T().Get().val);
 
       // computer visio process //
+      this->tracker->Update(scene);
       for(auto& marker : this->markers) {
-         TrackResult result;
-         if(marker.Lost()) {
-            result = this->featureTracker->Track(marker, scene);
-            this->motionTracker->Set(scene, result);
-            WindowManager::Get(this->id)->SetLabel(GetLabel("LOST"));
-         } else {
-            result = this->motionTracker->Track(marker, scene);
-            WindowManager::Get(this->id)->SetLabel(GetLabel("TRACKING"));
-         }
+         Matches result = this->tracker->Find(marker, scene);
 
-         if(result.scenePoints.size() > 20)
+         if(marker.Lost())
+            WindowManager::Get(this->id)->SetLabel(GetLabel(LOST));
+         else
+            WindowManager::Get(this->id)->SetLabel(GetLabel(TRACKING));
+
+         if(result.size() > 20)
             marker.SetLost(false);
          else marker.SetLost(true);
 
-         if(result.scenePoints.size() >= 4) {
+         if(result.size() >= 4) {
             Coords2D sceneCorners;
             const Coords2D& markerCorners = marker.GetWorld();
 
-            Mat homography = cv::findHomography(result.targetPoints, result.scenePoints, cv::RANSAC, 4);
+            Mat homography = cv::findHomography(result.targetPts(), result.scenePts(), cv::RANSAC, 4);
             cv::perspectiveTransform(markerCorners, sceneCorners, homography);
 
             Coords3D world = Coords3D(4);
@@ -163,22 +189,35 @@ void Application::AppRenderer::Render() const {
             glMatrixMode(GL_MODELVIEW);
             glLoadMatrixd(pose.T().Get().val);
 
-            marker.GetModel()->Draw(pose);
+            TMatx ipose = pose.Inv();
+            float position[] = { float(ipose(0, 3)), float(ipose(1, 3)), float(ipose(2, 3)), 1.0 };
+            glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+            glEnable(GL_LIGHTING);
+            glEnable(GL_CULL_FACE);
+               SPtr<Model> model = marker.GetModel();
+               Size3D dims = model->GetDims();
+
+               glTranslatef(0.0f, 0.0f, -dims.height / 2);
+               glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+               model->Draw();
+            glDisable(GL_LIGHTING);
+            glDisable(GL_CULL_FACE);
 
             if(!sceneCorners.empty()) {
-               cv::line(scene, sceneCorners[0], sceneCorners[1], cv::Scalar(0, 255, 0), 4);
-               cv::line(scene, sceneCorners[1], sceneCorners[2], cv::Scalar(0, 255, 0), 4);
-               cv::line(scene, sceneCorners[2], sceneCorners[3], cv::Scalar(0, 255, 0), 4);
-               cv::line(scene, sceneCorners[3], sceneCorners[0], cv::Scalar(0, 255, 0), 4);
+               cv::line(scene.image, sceneCorners[0], sceneCorners[1], cv::Scalar(0, 255, 0), 4);
+               cv::line(scene.image, sceneCorners[1], sceneCorners[2], cv::Scalar(0, 255, 0), 4);
+               cv::line(scene.image, sceneCorners[2], sceneCorners[3], cv::Scalar(0, 255, 0), 4);
+               cv::line(scene.image, sceneCorners[3], sceneCorners[0], cv::Scalar(0, 255, 0), 4);
             }
          }
 
-         for(auto p : result.scenePoints) {
-            cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
+         for(auto p : result.scenePts()) {
+            cv::circle(scene.image, p, 3, cv::Scalar(0, 255, 0), 1);
          }
 
          Mat flipped;
-         cv::flip(scene, flipped, 0);
+         cv::flip(scene.image, flipped, 0);
          ProjectFrame(flipped.ptr<GLubyte>(0), (GLsizei) flipped.cols, (GLsizei) flipped.rows);
       }
       // computer visio process end //
@@ -196,6 +235,7 @@ void Application::AppRenderer::Initialize() {
    // selecionar cor de fundo (preto)
    glClearColor (0.0, 0.0, 0.0, 0.0);
 
+   // setup texture to view video frame
    glEnable(GL_TEXTURE_2D);
    glGenTextures(1, &this->texture);
    glBindTexture(GL_TEXTURE_2D, this->texture);
@@ -207,6 +247,15 @@ void Application::AppRenderer::Initialize() {
    // Generates the image on the memory
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->frame.cols, this->frame.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, this->frame.ptr<GLubyte>(0));
    glDisable(GL_TEXTURE_2D);
+
+   // setup light and material
+	glEnable(GL_COLOR_MATERIAL);  // Utiliza cor do objeto como material
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+
+	glEnable(GL_LIGHT0);
+   glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION,0.0f);
+   glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0f);
+   glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION , 1.0f);
 }
 
 void Application::AppRenderer::Release() {

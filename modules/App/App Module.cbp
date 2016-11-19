@@ -19,9 +19,9 @@
 					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
-					<Add library="libfreeglut.a" />
-					<Add library="libopengl32.a" />
-					<Add library="libglu32.a" />
+					<Add library="freeglut" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
 					<Add directory="../../lib" />
 				</Linker>
 			</Target>
@@ -30,27 +30,29 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
-			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
+			<Add directory="%OPENCV_INSTALL%/include" />
 			<Add directory="../Core/include" />
 			<Add directory="../App/include" />
 			<Add directory="../View/include" />
+			<Add directory="../Model/include" />
 			<Add directory="../Track/include" />
 			<Add directory="../Camera/include" />
 		</Compiler>
 		<Linker>
-			<Add library="libAVRCoreDbg.a" />
-			<Add library="libAVRViewDbg.a" />
-			<Add library="libAVRTrackDbg.a" />
-			<Add library="libAVRCameraDbg.a" />
-			<Add library="libopencv_core2410.dll.a" />
-			<Add library="libopencv_highgui2410.dll.a" />
-			<Add library="libopencv_calib3d2410.dll.a" />
-			<Add library="libopencv_imgproc2410.dll.a" />
-			<Add library="libopencv_features2d2410.dll.a" />
-			<Add library="libopencv_flann2410.dll.a" />
-			<Add library="libopencv_nonfree2410.dll.a" />
-			<Add library="libopencv_video2410.dll.a" />
-			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
+			<Add library="AVRCoreDbg" />
+			<Add library="AVRViewDbg" />
+			<Add library="AVRModelDbg" />
+			<Add library="AVRTrackDbg" />
+			<Add library="AVRCameraDbg" />
+			<Add library="opencv_core2410.dll" />
+			<Add library="opencv_highgui2410.dll" />
+			<Add library="opencv_calib3d2410.dll" />
+			<Add library="opencv_imgproc2410.dll" />
+			<Add library="opencv_features2d2410.dll" />
+			<Add library="opencv_flann2410.dll" />
+			<Add library="opencv_nonfree2410.dll" />
+			<Add library="opencv_video2410.dll" />
+			<Add directory="%OPENCV_INSTALL%/x86/mingw/lib" />
 			<Add directory="../../lib/avrlib" />
 		</Linker>
 		<Unit filename="include/avr/Application.hpp" />

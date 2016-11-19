@@ -40,8 +40,8 @@ public:
          this->methods = new SystemAlgorithms(alg);
          return * this;
       }
-      //! sets the avr::SystemAlgorithms object via optimaze flags
-      Builder& optimaze(bool performance, bool quality) {
+      //! sets the avr::SystemAlgorithms object via optimize flags
+      Builder& optimize(bool performance, bool quality) {
          this->methods = new SystemAlgorithms(SystemAlgorithms::Create(performance, quality));
          return * this;
       }
@@ -96,7 +96,8 @@ public:
    void Resume();
 
    //! adds a new event listener to application's window
-   void AddListener(const EventListener&);
+   // TODO: Transferir para Builder
+   void AddListener(const SPtr<EventListener>&);
 
    //! takes a screenshot of the application @return the screen image
    cv::Mat Screenshot();
@@ -105,6 +106,7 @@ private:
    Application(const Builder&);
 
 private:
+   // TODO: Remover essa classe interna
    class AppRenderer;
 
    size_t id;
