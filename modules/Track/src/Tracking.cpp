@@ -8,7 +8,7 @@
 
 namespace avr {
 
-SPtr<Marker> TrackingSystem::Unpack(const PreMarker& mk) const {
+Marker HybridTracker::Registry(const PreMarker& mk) const {
    Mat image = cv::imread(mk.path, cv::IMREAD_GRAYSCALE);
    if(image.empty()) {
       AVR_ERROR(Cod::Undefined, "It did not read the image file to build the marker");
@@ -20,77 +20,65 @@ SPtr<Marker> TrackingSystem::Unpack(const PreMarker& mk) const {
    vector<Point2f> points;
    cv::KeyPoint::convert(keys, points);
 
-   return new Marker(image.size(), points, descs, mk.model);
+   return Marker(image.size(), points, descs, mk.model);
 }
 
-/**-----------------------------------------------------------------------------------------------------------------------------------------------**\
-*                                                        FeatureTracker                                                                             *
-\**-----------------------------------------------------------------------------------------------------------------------------------------------**/
+bool HybridTracker::Update(Frame& frame) {
+   if(!frame.image.empty() && this->oneLost) {
+      vector<cv::KeyPoint> keys;
+      methods.Detect(frame.image, keys);
+      methods.Extract(frame.image, keys, frame.descriptor);
+      cv::KeyPoint::convert(keys, frame.keys);
 
-TrackResult FeatureTracker::Track(const Marker& target, const Mat& scene, float trackedThreshold) {
-   cv::Mat sceneDescriptors;
-   vector<cv::KeyPoint> sceneKeypoints;
+      this->oneLost = false;
+      return true;
+   }
+   return false;
+}
+
+Matches HybridTracker::Find(const Marker& target, const Frame& scene) {
+   bool found = (target.lost) ? this->Localize(target, scene, target.lastMatches)
+                              : this->Track(target, scene, target.lastMatches);
+
+   this->oneLost = !found;
+
+   // backup and exit
+   scene.image.copyTo(this->prevScene);
+   return target.lastMatches;
+}
+
+bool HybridTracker::Localize(const Marker& target, const Frame& scene, Matches& out) {
    vector<cv::DMatch> matches;
+   methods.Match(target.descriptor, scene.descriptor, matches);
 
-   methods.Detect(scene, sceneKeypoints);
-   methods.Extract(scene, sceneKeypoints, sceneDescriptors);
-   methods.Match(this->UnpackDescs(target), sceneDescriptors, matches);
-
-   const Coords2D& targetKeypoints = this->UnpackKeys(target);
-
-   TrackResult result;
-   for(auto it : matches) {
-      result.targetPoints.push_back(targetKeypoints[it.queryIdx]);
-      result.scenePoints.push_back(sceneKeypoints[it.trainIdx].pt);
+   out.clear();
+   for(auto& it : matches) {
+      out._targetPts.push_back(target.keys[it.queryIdx]);
+      out._scenePts.push_back(scene.keys[it.trainIdx]);
+      out._error.push_back(it.distance);
    }
 
-   //double rate = matches.size() / (double) targetKeypoints.size();
-
-#ifdef DEBUG_
-   for(auto p : result.scenePoints) {
-      cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
-   }
-#endif // DEBUG_
-
-   return result;
+   return matches.size() > 20;
 }
 
-/**-----------------------------------------------------------------------------------------------------------------------------------------------**\
-*                                                         MotionTracker                                                                             *
-\**-----------------------------------------------------------------------------------------------------------------------------------------------**/
-
-TrackResult MotionTracker::Track(const Marker& target, const Mat& scene, float trackedThreshold) {
-   auto& scenePoints = this->prevResults.scenePoints;
-   auto& targetPoints = this->prevResults.targetPoints;
-
+bool HybridTracker::Track(const Marker& target, const Frame& scene, Matches& inout) {
    vector<Point2f> currPoints; vector<float> error;
-   this->methods.Track(this->prevScene, scenePoints, scene, currPoints, error);
+   this->methods.Track(this->prevScene, inout._scenePts, scene.image, currPoints, error);
 
    // Filtra os pontos que foram rastreados pelo status
    size_t k = 0;
    for(size_t i = 0; i < error.size(); i++) {
       if(0.0f <= error[i]) {
-         currPoints[k] = currPoints[i];
-         targetPoints[k++] = targetPoints[i];
+         inout._targetPts[k] = inout._targetPts[i];
+         inout._scenePts[k] = currPoints[i];
+         inout._error[k++] = error[i];
       }
    }
-   currPoints.resize(k);
-   targetPoints.resize(k);
+   inout._scenePts.resize(k);
+   inout._targetPts.resize(k);
+   inout._error.resize(k);
 
-   //const Coords2D& targetKeypoints = this->UnpackDescs(target);
-   //double rate = targetPoints.size() / (double) targetKeypoints.size();
-
-#ifdef DEBUG_
-   for(auto p : scenePoints) {
-      cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
-   }
-#endif // DEBUG_
-
-   scene.copyTo(this->prevScene);
-   scenePoints.clear();
-   scenePoints.assign(currPoints.begin(), currPoints.end());
-
-   return this->prevResults;
+   return k > 20;
 }
 
 } // namespace avr

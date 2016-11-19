@@ -15,19 +15,18 @@ using namespace avr;
 using namespace std;
 
 int main() {
-   cv::VideoCapture cap("../data/rabin_scene.mp4");
+   cv::VideoCapture cap("../data/guitar_scene.mp4");
    if(!cap.isOpened()) {
       cerr << "Camera/Video was not opened\n";
       return 1;
    }
 
    //SystemAlgorithms algorithms(new SIFTDetector(500), new SIFTExtractor, new BruteForceMatcher(cv::NORM_L2), new LucasKanadeAlgorithm);
-   SystemAlgorithms algorithms = SystemAlgorithms::Create(true, false);
+   SystemAlgorithms algorithms = SystemAlgorithms::Create(false, true);
 
-   FeatureTracker featureTracker(algorithms);
-   MotionTracker motionTracker(Mat(), TrackResult(), algorithms);
+   HybridTracker tracker(algorithms);
 
-   Marker target = * featureTracker.Unpack(PreMarker("../data/rabin_object.jpg", nullptr));
+   Marker target = tracker.Registry(PreMarker("../data/guitar_object.jpg", nullptr));
    Size2i targetSize = target.GetSize();
 
    vector<cv::Point2f> targetCorner(4);
@@ -39,47 +38,41 @@ int main() {
    uint numFrames = 0;
    double time = (double) cv::getTickCount();
 
-   //Mat captured(cap.get(CV_CAP_PROP_FRAME_HEIGHT), cap.get(CV_CAP_PROP_FRAME_WIDTH), cap.get(CV_CAP_PROP_FORMAT));
+   Frame frame;
+   Matches matches;
 
    while(true) {
-      Mat scene;
-      cap >> scene;
+      cap >> frame.image;
 
-      if(scene.empty() and numFrames == 0) continue;
-      if(scene.empty()) break;
+      if(frame.image.empty() and numFrames == 0) continue;
+      if(frame.image.empty()) break;
 
       numFrames++;
 
-      TrackResult trackResult;
-      if(target.Lost()) {
-         cout << "lost\n";
-         trackResult = featureTracker.Track(target, scene);
-         motionTracker.Set(scene, trackResult);
-      } else {
-         trackResult = motionTracker.Track(target, scene);
-      }
+      tracker.Update(frame);
+      matches = tracker.Find(target, frame);
 
-      if(trackResult.scenePoints.size() > 20) target.SetLost(false);
+      if(matches.size() > 20) target.SetLost(false);
       else target.SetLost(true);
 
-      if(trackResult.scenePoints.size() >= 4) {
+      if(matches.size() >= 4) {
          vector<Point2f> corners;
-         Mat homography = cv::findHomography(trackResult.targetPoints, trackResult.scenePoints, cv::RANSAC, 4);
+         Mat homography = cv::findHomography(matches.targetPts(), matches.scenePts(), cv::RANSAC, 4);
          cv::perspectiveTransform(targetCorner, corners, homography);
 
          if(!corners.empty()) {
-            cv::line(scene, corners[0], corners[1], cv::Scalar(0, 255, 0), 4);
-            cv::line(scene, corners[1], corners[2], cv::Scalar(0, 255, 0), 4);
-            cv::line(scene, corners[2], corners[3], cv::Scalar(0, 255, 0), 4);
-            cv::line(scene, corners[3], corners[0], cv::Scalar(0, 255, 0), 4);
+            cv::line(frame.image, corners[0], corners[1], cv::Scalar(0, 255, 0), 4);
+            cv::line(frame.image, corners[1], corners[2], cv::Scalar(0, 255, 0), 4);
+            cv::line(frame.image, corners[2], corners[3], cv::Scalar(0, 255, 0), 4);
+            cv::line(frame.image, corners[3], corners[0], cv::Scalar(0, 255, 0), 4);
          }
       }
 
-      for(auto p : trackResult.scenePoints) {
-         cv::circle(scene, p, 3, cv::Scalar(0, 255, 0), 1);
+      for(auto p : matches.scenePts()) {
+         cv::circle(frame.image, p, 3, cv::Scalar(0, 255, 0), 1);
       }
 
-      cv::imshow("Tracker Test", scene);
+      cv::imshow("Tracker Test", frame.image);
       char key = cv::waitKey(1);
       if(key == 0x1B) // ESC
          break;

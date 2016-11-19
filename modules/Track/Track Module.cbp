@@ -13,8 +13,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-O2" />
 					<Add option="-std=c++11" />
+					<Add option="-g" />
 					<Add directory="../../include" />
 				</Compiler>
 				<Linker>
@@ -53,21 +53,23 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
-			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
+			<Add directory="%OPENCV_INSTALL%/include" />
 			<Add directory="../Core/include" />
 			<Add directory="../Track/include" />
+			<Add directory="../Model/include" />
 			<Add directory="../Camera/include" />
 		</Compiler>
 		<Linker>
-			<Add library="libAVRCoreDbg.a" />
-			<Add library="libAVRCameraDbg.a" />
+			<Add library="AVRCoreDbg" />
+			<Add library="AVRModelDbg" />
+			<Add library="AVRCameraDbg" />
 			<Add library="libopencv_core2410.dll.a" />
 			<Add library="libopencv_flann2410.dll.a" />
 			<Add library="libopencv_video2410.dll.a" />
 			<Add library="libopencv_calib3d2410.dll.a" />
 			<Add library="libopencv_nonfree2410.dll.a" />
 			<Add library="libopencv_features2d2410.dll.a" />
-			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
+			<Add directory="%OPENCV_INSTALL%/x86/mingw/lib" />
 			<Add directory="../../lib/avrlib" />
 		</Linker>
 		<Unit filename="include/avr/track/Algorithms.hpp" />
