@@ -62,10 +62,10 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-std=c++11" />
 			<Add option="-Wall" />
+			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
-			<Add directory="C:/Libraries/opencv/build/x86/mingw/install/include" />
+			<Add directory="%OPENCV_INSTALL%/include" />
 			<Add directory="../Core/include" />
 			<Add directory="../Track/include" />
 			<Add directory="../Camera/include" />
@@ -75,7 +75,7 @@
 			<Add library="libAVRTrackDbg.a" />
 			<Add library="libopencv_calib3d2410.dll.a" />
 			<Add library="libopencv_core2410.dll.a" />
-			<Add directory="C:/Libraries/opencv/build/x86/mingw/lib" />
+			<Add directory="%OPENCV_INSTALL%/x86/mingw/lib" />
 			<Add directory="../../lib/avrlib" />
 		</Linker>
 		<Unit filename="CameraAxisView.cpp">
